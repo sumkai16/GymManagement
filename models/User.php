@@ -1,27 +1,22 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
-
+// models/User.php
 class User {
     private $conn;
     private $table = "users";
-
-    public $user_id;
-    public $username;
-    public $password;
-    public $role;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    public function register($username, $password, $role = "member") {
-        $query = "INSERT INTO " . $this->table . " (username, password, role) VALUES (:username, :password, :role)";
+    public function register($username, $password, $role = "member", $status="inactive") {
+        $query = "INSERT INTO " . $this->table . " (username, password, role, status) VALUES (:username, :password, :role, :status)";
         $stmt = $this->conn->prepare($query);
 
+        $hash = password_hash($password, PASSWORD_BCRYPT);
         $stmt->bindParam(":username", $username);
-        $stmt->bindParam(":password", password_hash($password, PASSWORD_BCRYPT));
+        $stmt->bindParam(":password", $hash);
         $stmt->bindParam(":role", $role);
-
+        $stmt->bindParam(":status", $status);
         return $stmt->execute();
     }
 
@@ -32,11 +27,9 @@ class User {
         $stmt->execute();
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
         if ($user && password_verify($password, $user['password'])) {
             return $user;
         }
         return false;
     }
 }
-?>
