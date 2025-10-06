@@ -3,13 +3,15 @@ session_start();
 
 // If user already logged in, skip login/register
 if (isset($_SESSION['user_id'])) {
-    $role = $_SESSION['role'] ?? 'member';
+     $role = $_SESSION['role'] ?? 'member';
     if ($role === 'admin') {
-        header("Location: ../dashboard/admin.php");
+        header("Location: ../views/admin/admin_dashboard.php");
     } elseif ($role === 'trainer') {
-        header("Location: ../dashboard/trainer.php");
-    } else {
-        header("Location: ../dashboard/member.php");
+        header("Location: ../views/trainer/trainer_dashboard.php");
+    } elseif ($role === 'member') {
+        header("Location: ../views/member/member_dashboard.php");
+    }else {
+        header("Location: ../views/guest.php");
     }
     exit;
 }
@@ -21,6 +23,7 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../../assets/css/auth.css">
 </head>
 <body>
+    <?php include __DIR__ . '/../utilities/alert.php'; ?>
     <h2>Register</h2>
     <div class="form">
         <?php if (!empty($_SESSION['flash'])): ?>

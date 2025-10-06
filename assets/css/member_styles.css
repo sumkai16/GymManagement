@@ -356,6 +356,170 @@ a {
     color: var(--sidebar-color);
 }
 
+/* Top Navbar */
+header.top-navbar {
+    height: 60px;
+    background: var(--sidebar-color);
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: fixed;
+    width: calc(100% - 250px);
+    left: 250px;
+    top: 0;
+    z-index: 1000;
+    transition: left 0.3s, width 0.3s;
+}
+
+.sidebar.close ~ header.top-navbar {
+    width: calc(100% - 80px);
+    left: 80px;
+}
+
+header.top-navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+header.top-navbar .logo img {
+    width: 40px;
+    height: 40px;
+}
+
+header.top-navbar .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+header.top-navbar .nav-right i.bell {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+    position: relative;
+}
+
+header.top-navbar .nav-right i.bell::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+}
+
+header.top-navbar .nav-right .profile {
+    position: relative;
+    cursor: pointer;
+}
+
+header.top-navbar .nav-right .profile img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+header.top-navbar .nav-right .profile .dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: var(--sidebar-color);
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 5px;
+    overflow: hidden;
+    z-index: 1001;
+}
+
+header.top-navbar .nav-right .profile:hover .dropdown {
+    display: block;
+}
+
+header.top-navbar .nav-right .profile .dropdown a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+header.top-navbar .nav-right .profile .dropdown a:hover {
+    background-color: var(--primary-color);
+    color: var(--sidebar-color);
+}
+
+/* Main Content Area Adjustment */
+.main-content {
+    margin-top: 60px;
+}
+
+/* Content Area for Guest */
+.content-area {
+    margin-left: 250px;
+    padding: 20px;
+    transition: var(--tran-03);
+    min-height: 100vh;
+    margin-top: 60px;
+}
+
+.content-area.close {
+    margin-left: 80px;
+}
+
+/* Hero Section */
+.hero-section {
+    background: #f5f7fa;
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.hero-section h1 {
+    margin: 0 0 10px;
+    font-size: 2rem;
+    color: var(--accent);
+}
+
+.hero-section p {
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+/* Cards Container */
+.cards-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+/* Subscribe Button */
+.btn-subscribe {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: var(--sidebar-color);
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-subscribe:hover {
+    background: var(--accent);
+}
+
 /* Dashboard Header */
 .dashboard-header {
     margin-bottom: 30px;
