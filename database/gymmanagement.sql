@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 03, 2025 at 12:58 PM
+-- Generation Time: Oct 08, 2025 at 01:44 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -125,6 +125,29 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','trainer','member','guest') NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('active','inactive','','') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`user_id`, `username`, `password`, `role`, `created_at`, `status`) VALUES
+(10, 'admin', '$2y$10$AUG1ftAJ8uVkFdFmmMqpdOStnJsKJaEavhfZOZSdAuImIaDI9eCMa', 'member', '2025-10-05 06:05:15', 'active'),
+(13, 'guest', '$2y$10$vnJCy2J/jSERZRJOzaGWruQcfGtlKmebsERQmjSI/.EW0sIgT9dCW', 'guest', '2025-10-07 13:10:01', 'active'),
+(14, 'member', '$2y$10$IDbNhnZOSBnu9McC6s/TzeAHA8MYwA1ieaysH.pUq/iawcIB.VtLS', 'member', '2025-10-07 14:23:59', 'active');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `workouts`
+--
+
+CREATE TABLE `workouts` (
+  `workout_id` int(11) NOT NULL,
+  `routine_id` int(11) NOT NULL,
+  `workout_name` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -226,6 +249,13 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `username` (`username`);
 
 --
+-- Indexes for table `workouts`
+--
+ALTER TABLE `workouts`
+  ADD PRIMARY KEY (`workout_id`),
+  ADD KEY `routine_id` (`routine_id`);
+
+--
 -- Indexes for table `workout_exercises`
 --
 ALTER TABLE `workout_exercises`
@@ -293,7 +323,13 @@ ALTER TABLE `trainers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `workouts`
+--
+ALTER TABLE `workouts`
+  MODIFY `workout_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `workout_exercises`
@@ -348,25 +384,10 @@ ALTER TABLE `trainers`
   ADD CONSTRAINT `trainers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
 
 --
--- Constraints for table `workout_exercises`
+-- Constraints for table `workouts`
 --
-ALTER TABLE `workout_exercises`
-  ADD CONSTRAINT `workout_exercises_ibfk_1` FOREIGN KEY (`workout_id`) REFERENCES `workouts` (`workout_id`),
-  ADD CONSTRAINT `workout_exercises_ibfk_2` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`exercise_id`);
-
---
--- Constraints for table `workout_logs`
---
-ALTER TABLE `workout_logs`
-  ADD CONSTRAINT `workout_logs_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `members` (`member_id`),
-  ADD CONSTRAINT `workout_logs_ibfk_2` FOREIGN KEY (`workout_id`) REFERENCES `workouts` (`workout_id`),
-  ADD CONSTRAINT `workout_logs_ibfk_3` FOREIGN KEY (`exercise_id`) REFERENCES `exercises` (`exercise_id`);
-
---
--- Constraints for table `workout_routines`
---
-ALTER TABLE `workout_routines`
-  ADD CONSTRAINT `workout_routines_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `workouts`
+  ADD CONSTRAINT `workouts_ibfk_1` FOREIGN KEY (`routine_id`) REFERENCES `workout_routines` (`routine_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
