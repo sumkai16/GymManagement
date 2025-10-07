@@ -388,11 +388,11 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
     
     debugLog('Logout button clicked');
 
-    fetch("../../controllers/AuthController.php?action=logout")
+    fetch("../controllers/AuthController.php?action=logout")
         .then(() => {
             debugLog('Logout successful, redirecting to login');
             // Force redirect to login page after logout
-            window.location.href = "../../views/auth/login.php";
+            window.location.href = "../views/auth/login.php";
         })
         .catch(err => {
             debugLog('Logout error:', err);

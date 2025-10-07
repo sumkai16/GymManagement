@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             if ($userModel->register($username, $password, $role, $status)) {
-                $_SESSION['success'] = "Registration successful. Please log in.";
+                $_SESSION['success'] = "Registration successful. User still needs to be activated by admin.";
                 header("Location: ../views/auth/login.php");
                 exit;
             } else {
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role'] = htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8');
             $_SESSION['status'] = htmlspecialchars($user['status'], ENT_QUOTES, 'UTF-8');
             $_SESSION['login_time'] = time();
-            $_SESSION['success'] = ucfirst($user['role']) . " login successful! Redirecting...";
+            $_SESSION['success'] = ucfirst($user['role']) . "Login successful!";
 
             // Role-based redirect with validation
             $redirect = null;

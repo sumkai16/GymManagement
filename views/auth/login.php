@@ -21,7 +21,7 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Login - FitNexus</title>
     <link rel="stylesheet" href="../../assets/css/auth.css">
 </head>
 <body>
