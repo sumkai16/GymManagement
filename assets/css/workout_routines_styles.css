@@ -1,0 +1,558 @@
+/* Workout Routines Styles - Gym-Inspired Design */
+
+/* Routines Container */
+.routines-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.routines-section {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 
+        0 10px 30px rgba(102, 126, 234, 0.1),
+        0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.routines-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+    border-radius: 20px 20px 0 0;
+}
+
+.routines-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 15px 35px rgba(102, 126, 234, 0.15),
+        0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.routines-section h3 {
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Routine List - Gym Card Style */
+.routine-list {
+    max-height: 550px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.routine-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.routine-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.routine-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 3px;
+}
+
+.routine-item {
+    border: 2px solid transparent;
+    border-radius: 16px;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    position: relative;
+}
+
+.routine-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: all 0.3s ease;
+}
+
+.routine-item:hover {
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+    transform: translateY(-4px);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.routine-item:hover::before {
+    width: 6px;
+}
+
+.routine-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.routine-info h4 {
+    margin: 0;
+    color: #1a202c;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.routine-info p {
+    margin: 0.5rem 0 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.routine-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.routine-exercises {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+/* Exercise Items */
+.exercise-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.exercise-info h5 {
+    margin: 0;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.exercise-info p {
+    margin: 0.25rem 0 0 0;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a6fd8;
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 2% auto;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.close {
+    font-size: 2rem;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close:hover {
+    color: #333;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Exercise Categories */
+.exercise-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.category-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.category-section h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.exercise-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.exercise-option:hover {
+    background: #f3f4f6;
+}
+
+.exercise-option input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+/* No Data State */
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.no-data i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Exercise Selection Styles */
+.exercise-selection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.exercise-selection h4 {
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.muscle-group {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.muscle-group:hover {
+    background: #f9fafb;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.1);
+}
+
+.muscle-group h5 {
+    margin: 0 0 1rem 0;
+    color: #3b82f6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.exercise-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.exercise-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.exercise-options label:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #1a202c;
+}
+
+.exercise-options input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.sets-reps-template {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.sets-reps-template h4 {
+    margin: 0 0 1rem 0;
+    color: #1a202c;
+    font-size: 1rem;
+}
+
+/* Custom Checkbox Styling */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.checkbox-group input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-group input[type="checkbox"]:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.checkbox-group input[type="checkbox"]:checked {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.checkbox-group input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #374151;
+    font-weight: 500;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.checkbox-group label:hover {
+    color: #1a202c;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label {
+    color: #1a202c;
+    font-weight: 600;
+}
+
+/* Form Row Styling */
+.form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-row .form-group:last-child {
+    flex: 0 0 auto;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .routines-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .exercise-categories {
+        grid-template-columns: 1fr;
+    }
+    
+    .exercise-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .exercise-selection {
+        max-height: 50vh;
+        padding: 1rem;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 2% auto;
+        padding: 1rem;
+    }
+}

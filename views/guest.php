@@ -24,78 +24,8 @@ $username = $_SESSION['username'] ?? 'Guest';
     <!-- Include Alert System -->
     <?php include 'utilities/alert.php'; ?>
     
-    <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-        <i class='bx bx-menu'></i>
-    </button>
-    
-    <!-- Sidebar Overlay for Mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
-    <!-- Sidebar -->
-    <nav class="sidebar close">
-        <header>
-            <div class="logo">
-                <img src="../assets/images/logo.png" alt="Logo" width="150">
-                <div class="text">
-                    <span class="welcome">Welcome,</span>
-                    <span class="member-name"><?php echo htmlspecialchars($username); ?>!</span>
-                </div>
-            </div>
-            <i class='bx bx-chevron-right toggle'></i>
-        </header>
-
-        <div class="menu-bar">
-            <div class="menu">
-                <ul class="menu-links">
-                    <li class="nav-link active">
-                        <a href="#home">
-                            <i class='bx bx-home-alt icon'></i>
-                            <span class="text nav-text">Home</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <a href="#subscription">
-                            <i class='bx bx-credit-card icon'></i>
-                            <span class="text nav-text">Subscription Plans</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <a href="#trainers">
-                            <i class='bx bx-dumbbell icon'></i>
-                            <span class="text nav-text">Available Trainers</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <a href="#trial">
-                            <i class='bx bx-clipboard icon'></i>
-                            <span class="text nav-text">Trial Workout Log</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <a href="#contact">
-                            <i class='bx bx-phone icon'></i>
-                            <span class="text nav-text">Contact & Support</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Logout Section -->
-            <div class="bottom-cont">
-                <li>
-                    <a href="../controllers/AuthController.php?action=logout" id="logoutBtn">
-                        <i class='bx bx-log-out-circle icon'></i>
-                        <span class="text nav-text">Logout</span>
-                    </a>
-                </li>
-            </div>
-        </div>
-    </nav>
+    <!-- Include Dynamic Sidebar -->
+    <?php include 'components/dynamic_sidebar.php'; ?>
 
 
     <!-- Main Content Area -->
@@ -449,6 +379,6 @@ $username = $_SESSION['username'] ?? 'Guest';
         </div>
     </div>
 
-    <script src="../assets/js/dashboard_guest.js"></script>
+    <!-- Dynamic sidebar JavaScript is already included in the sidebar component -->
 </body>
 </html>

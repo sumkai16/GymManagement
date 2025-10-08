@@ -5,13 +5,13 @@ session_start();
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['role'] ?? 'member';
     if ($role === 'admin') {
-        header("Location: ../views/admin/admin_dashboard.php");
+        header("Location: admin/admin_dashboard.php");
     } elseif ($role === 'trainer') {
-        header("Location: ../views/trainer/trainer_dashboard.php");
+        header("Location: trainers/trainers_dashboard.php");
     } elseif ($role === 'member') {
-        header("Location: ../views/member/member_dashboard.php");
-    }else {
-        header("Location: ../views/guest.php");
+        header("Location: member/member_dashboard.php");
+    } else {
+        header("Location: ../guest.php");
     }
     exit;
 }

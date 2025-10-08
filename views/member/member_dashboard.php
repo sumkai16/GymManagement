@@ -16,81 +16,13 @@ $data = $member->getDashboardData($_SESSION['user_id']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - FitNexus</title>
     <link rel="stylesheet" type="text/css" href="../../assets/css/member_styles.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard_styles.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 
 <body>
-    <nav class="sidebar close">
-        <header>
-            <div class="logo">
-                <img src="../../assets/images/logo.png" alt="Logo" width="150">
-                <div class="text">
-                    <span class="welcome">Welcome,</span>
-                    <span class="member-name"><?php echo htmlspecialchars($member_name); ?></span>
-                </div>
-            </div>
-            <i class='bx bx-chevron-right toggle'></i>
-        </header>
-
-        <div class="menu-bar">
-            <div class="menu">
-                <ul class="menu-links">
-                    <li class="nav-link active">
-                        <a href="member.php">
-                            <i class='bx bx-home-alt icon'></i>
-                            <span class="text nav-text">Dashboard</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <a href="workout.php">
-                            <i class='bx bx-dumbbell icon'></i>
-                            <span class="text nav-text">Workout</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <button class="dropdown-btn">
-                            <i class='bx bx-bowl-rice icon'></i>
-                            <span class="text nav-text">Nutrition</span>
-                            <i class='bx bx-chevron-down dropdown-arrow'></i>
-                        </button>
-                    </li>
-                    <div class="dropdown-container">
-                        <a href="nutrition-food.php">
-                            <span class="text nav-text">Food</span>
-                        </a>
-                        <a href="nutrition-supplement.php">
-                            <span class="text nav-text">Supplement</span>
-                        </a>
-                    </div>
-
-                    <li class="nav-link">
-                        <a href="coaches.php">
-                            <i class='bx bx-group icon'></i>
-                            <span class="text nav-text">Coaches</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-link">
-                        <a href="profile.php">
-                            <i class='bx bxs-user icon'></i>
-                            <span class="text nav-text">Profile</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="bottom-cont">
-                <li>
-                    <a href="../../controllers/AuthController.php?action=logout" id="logoutBtn">
-                        <i class='bx bx-log-out-circle icon'></i>
-                        <span class="text nav-text">Logout</span>
-                    </a>
-                </li>
-            </div>
-        </div>
-    </nav>
+    <!-- Include Dynamic Sidebar -->
+    <?php include '../components/dynamic_sidebar.php'; ?>
 
     <!-- Main Content Area -->
     <div class="main-content">
@@ -305,7 +237,7 @@ $data = $member->getDashboardData($_SESSION['user_id']);
         </div>
     </div>
 
-    <script src="../../assets/js/dashboard_member.js"></script>
+    <!-- Dynamic sidebar JavaScript is already included in the sidebar component -->
 </body>
 </html>
 </html>
