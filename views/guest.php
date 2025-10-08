@@ -18,14 +18,99 @@ $username = $_SESSION['username'] ?? 'Guest';
     <title>Guest - FitNexus</title>
     <link rel="stylesheet" href="../assets/css/member_styles.css">
     <link rel="stylesheet" href="../assets/css/guest_dashboard.css">
+    <link rel="stylesheet" href="../assets/css/modal_styles.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
     <!-- Include Alert System -->
     <?php include 'utilities/alert.php'; ?>
-    
-    <!-- Include Dynamic Sidebar -->
-    <?php include 'components/dynamic_sidebar.php'; ?>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class='bx bx-menu'></i>
+    </button>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Guest Sidebar -->
+    <nav class="sidebar close" id="guestSidebar">
+        <header>
+            <div class="logo">
+                <img src="../assets/images/logo.png" alt="Logo" width="150">
+                <div class="text">
+                    <span class="welcome">Welcome,</span>
+                    <span class="member-name"><?php echo htmlspecialchars($username); ?>!</span>
+                </div>
+            </div>
+            <i class='bx bx-chevron-right toggle'></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+                <ul class="menu-links">
+                    <li class="nav-link active">
+                        <a href="#home">
+                            <i class='bx bx-home icon'></i>
+                            <span class="text nav-text">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#subscription">
+                            <i class='bx bx-credit-card icon'></i>
+                            <span class="text nav-text">Membership Plans</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#trainers">
+                            <i class='bx bx-user icon'></i>
+                            <span class="text nav-text">Trainers</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#trial">
+                            <i class='bx bx-dumbbell icon'></i>
+                            <span class="text nav-text">Trial Workout</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#contact">
+                            <i class='bx bx-phone icon'></i>
+                            <span class="text nav-text">Contact</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Logout Section -->
+            <div class="bottom-content">
+                <li class="nav-link logout">
+                    <a href="#" onclick="openLogoutModal()">
+                        <i class='bx bx-log-out icon'></i>
+                        <span class="text nav-text">Logout</span>
+                    </a>
+                </li>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class='bx bx-log-out'></i>
+                <h3>Logout Confirmation</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to logout?</p>
+                <p class="modal-subtext">You will need to sign in again to access your account.</p>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeLogoutModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="confirmLogout()" class="btn btn-primary">Logout</button>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Main Content Area -->
@@ -379,6 +464,228 @@ $username = $_SESSION['username'] ?? 'Guest';
         </div>
     </div>
 
-    <!-- Dynamic sidebar JavaScript is already included in the sidebar component -->
+    <!-- Guest Sidebar JavaScript -->
+    <script>
+    // GuestSidebar JavaScript - Inline to avoid path issues
+    class GuestSidebar {
+        constructor() {
+            this.sidebar = document.getElementById('guestSidebar');
+            this.toggle = document.querySelector('.toggle');
+            this.mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            this.sidebarOverlay = document.getElementById('sidebarOverlay');
+            this.body = document.body;
+
+            this.init();
+        }
+
+        init() {
+            this.setupEventListeners();
+            this.setupMobileResponsiveness();
+            this.setupActiveStates();
+            this.loadSidebarState();
+        }
+
+        setupEventListeners() {
+            // Desktop sidebar toggle
+            if (this.toggle) {
+                this.toggle.addEventListener('click', () => {
+                    this.toggleSidebar();
+                });
+            }
+
+            // Mobile menu toggle
+            if (this.mobileMenuToggle) {
+                this.mobileMenuToggle.addEventListener('click', () => {
+                    this.toggleMobileSidebar();
+                });
+            }
+
+            // Close sidebar when clicking overlay
+            if (this.sidebarOverlay) {
+                this.sidebarOverlay.addEventListener('click', () => {
+                    this.closeMobileSidebar();
+                });
+            }
+
+            // Close mobile sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 &&
+                    !this.sidebar.contains(e.target) &&
+                    !this.mobileMenuToggle.contains(e.target)) {
+                    this.closeMobileSidebar();
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                this.handleResize();
+            });
+
+            // Setup dropdown functionality (none for guest)
+            // this.setupDropdowns();
+        }
+
+        setupMobileResponsiveness() {
+            // Check if we're on mobile on load
+            if (window.innerWidth <= 768) {
+                this.closeMobileSidebar();
+            }
+        }
+
+        setupActiveStates() {
+            // Update active states based on current hash
+            const currentHash = window.location.hash;
+            const menuLinks = document.querySelectorAll('.menu-links .nav-link');
+
+            menuLinks.forEach(link => {
+                const href = link.querySelector('a').getAttribute('href');
+                if (href && currentHash === href) {
+                    // Remove active class from all links
+                    menuLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to current link
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        toggleSidebar() {
+            if (this.sidebar) {
+                this.sidebar.classList.toggle('close');
+                this.saveSidebarState();
+            }
+        }
+
+        toggleMobileSidebar() {
+            if (this.sidebar) {
+                this.sidebar.classList.toggle('mobile-open');
+                this.sidebarOverlay.classList.toggle('active');
+                this.body.classList.toggle('sidebar-open');
+            }
+        }
+
+        closeMobileSidebar() {
+            if (this.sidebar) {
+                this.sidebar.classList.remove('mobile-open');
+                this.sidebarOverlay.classList.remove('active');
+                this.body.classList.remove('sidebar-open');
+            }
+        }
+
+        handleResize() {
+            if (window.innerWidth > 768) {
+                // Desktop view - remove mobile classes
+                this.sidebar.classList.remove('mobile-open');
+                this.sidebarOverlay.classList.remove('active');
+                this.body.classList.remove('sidebar-open');
+            } else {
+                // Mobile view - ensure sidebar is closed by default
+                this.closeMobileSidebar();
+            }
+        }
+
+        saveSidebarState() {
+            const isClosed = this.sidebar.classList.contains('close');
+            localStorage.setItem('sidebarState', isClosed ? 'closed' : 'open');
+        }
+
+        loadSidebarState() {
+            const savedState = localStorage.getItem('sidebarState');
+            if (savedState === 'closed') {
+                this.sidebar.classList.add('close');
+            } else if (savedState === 'open') {
+                this.sidebar.classList.remove('close');
+            }
+        }
+
+        // Public method to programmatically toggle sidebar
+        toggle() {
+            this.toggleSidebar();
+        }
+
+        // Public method to set sidebar state
+        setState(isOpen) {
+            if (isOpen) {
+                this.sidebar.classList.remove('close');
+            } else {
+                this.sidebar.classList.add('close');
+            }
+            this.saveSidebarState();
+        }
+    }
+
+    // Initialize the guest sidebar when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        window.guestSidebar = new GuestSidebar();
+
+        // Navigation functionality
+        const navLinks = document.querySelectorAll('.nav-link a');
+        const dashboardSections = document.querySelectorAll('.dashboard-section');
+
+        // Handle navigation clicks
+        navLinks.forEach((link) => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+
+                // Remove active class from all nav links
+                navLinks.forEach(navLink => {
+                    navLink.parentElement.classList.remove('active');
+                });
+
+                // Add active class to clicked link
+                link.parentElement.classList.add('active');
+
+                // Hide all sections
+                dashboardSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Show target section
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                // Close mobile menu if open
+                const sidebar = document.getElementById('guestSidebar');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
+                if (window.innerWidth <= 768 && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                    if (sidebarOverlay) {
+                        sidebarOverlay.classList.remove('active');
+                    }
+                    document.body.classList.remove('sidebar-open');
+                }
+            });
+        });
+
+        // Set initial active section
+        const homeSection = document.getElementById('home');
+        if (homeSection) {
+            homeSection.classList.add('active');
+        }
+    });
+
+    // Logout Modal Functions
+    function openLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'block';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function confirmLogout() {
+        window.location.href = '../controllers/AuthController.php?action=logout';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('logoutModal');
+        if (event.target === modal) {
+            closeLogoutModal();
+        }
+    }
+    </script>
 </body>
 </html>
