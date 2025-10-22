@@ -22,15 +22,15 @@ return [
                 'permissions' => ['admin']
             ],
             [
-                'icon' => 'bx-dumbbell',
-                'text' => 'Trainers',
-                'url' => 'trainers.php',
+                'icon' => 'bx-user',
+                'text' => 'Users',
+                'url' => 'users.php',
                 'permissions' => ['admin']
             ],
             [
-                'icon' => 'bx-calendar',
-                'text' => 'Schedules',
-                'url' => 'schedules.php',
+                'icon' => 'bx-dumbbell',
+                'text' => 'Trainers',
+                'url' => 'trainers.php',
                 'permissions' => ['admin']
             ],
             [
