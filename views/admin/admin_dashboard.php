@@ -5,34 +5,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-require_once '../../controllers/AdminController.php';
-$adminController = new AdminController();
-
-// Handle AJAX requests for dynamic data
-if (isset($_GET['action'])) {
-    $action = $_GET['action'];
-
-    switch ($action) {
-        case 'get_stats':
-            $stats = $adminController->getDashboardStats();
-            header('Content-Type: application/json');
-            echo json_encode($stats);
-            exit;
-
-        case 'get_recent_members':
-            $members = $adminController->getRecentMembers(5);
-            header('Content-Type: application/json');
-            echo json_encode($members);
-            exit;
-
-        case 'get_recent_trainers':
-            $trainers = $adminController->getRecentTrainers(5);
-            header('Content-Type: application/json');
-            echo json_encode($trainers);
-            exit;
-    }
-}
-
 $username = $_SESSION['username'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
@@ -73,7 +45,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-user'></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="totalMembers">--</h3>
+                        <h3>150</h3>
                         <p>Total Members</p>
                     </div>
                 </div>
@@ -82,7 +54,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-dumbbell'></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="activeTrainers">--</h3>
+                        <h3>8</h3>
                         <p>Active Trainers</p>
                     </div>
                 </div>
@@ -91,7 +63,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-credit-card'></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="monthlyRevenue">--</h3>
+                        <h3>₱45,000</h3>
                         <p>Monthly Revenue</p>
                     </div>
                 </div>
@@ -100,7 +72,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-calendar'></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="sessionsToday">--</h3>
+                        <h3>25</h3>
                         <p>Sessions Today</p>
                     </div>
                 </div>
@@ -110,47 +82,51 @@ $username = $_SESSION['username'] ?? 'Admin';
             <div class="dashboard-grid">
                 <div class="dashboard-section">
                     <div class="section-header">
-                        <h2>Recent Members</h2>
-                        <a href="members.php" class="view-all">View All</a>
+                        <h2>Recent Payments</h2>
+                        <a href="payments.php" class="view-all">View All</a>
                     </div>
                     <div class="card">
-                        <div id="recentMembersContent">
-                            <div class="recent-loading">
-                                <div class="loading-spinner"></div>
-                                <p>Loading recent members...</p>
-                            </div>
-                        </div>
+                        <p>Manage member registrations, payments, and profiles.</p>
                     </div>
                 </div>
 
                 <div class="dashboard-section">
                     <div class="section-header">
-                        <h2>Trainer Management</h2>
-                        <a href="trainers.php" class="view-all">View All</a>
+                        <h2>Today's Attendance</h2>
+                        <a href="attendance.php" class="view-all">View All</a>
                     </div>
                     <div class="card">
-                        <div id="recentTrainersContent">
-                            <div class="recent-loading">
-                                <div class="loading-spinner"></div>
-                                <p>Loading recent trainers...</p>
-                            </div>
-                        </div>
+                        <p>Manage trainer schedules, assignments, and performance.</p>
                     </div>
                 </div>
 
                 <div class="dashboard-section">
                     <div class="section-header">
-                        <h2>Financial Reports</h2>
-                        <a href="reports.php" class="view-all">View All</a>
+                        <h2>Quick Actions</h2>
                     </div>
                     <div class="card">
-                        <p>View revenue, payments, and financial analytics.</p>
+                        <div class="quick-actions">
+                            <a href="members.php" class="action-link">
+                                <i class='bx bx-user-plus'></i>
+                                <span>Add Member</span>
+                            </a>
+                            <a href="trainers.php" class="action-link">
+                                <i class='bx bx-dumbbell'></i>
+                                <span>Add Trainer</span>
+                            </a>
+                            <a href="payments.php" class="action-link">
+                                <i class='bx bx-credit-card'></i>
+                                <span>Record Payment</span>
+                            </a>
+                            <a href="attendance.php" class="action-link">
+                                <i class='bx bx-log-in'></i>
+                                <span>Check-in Member</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="../../assets/js/admin_dashboard.js"></script>
 </body>
 </html>
