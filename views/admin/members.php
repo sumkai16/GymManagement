@@ -389,7 +389,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                 <input type="hidden" id="delete_member_id" name="member_id">
                 <div class="modal-body">
                     <p>Are you sure you want to delete member "<span id="delete_member_name"></span>"?</p>
-                    <p class="modal-subtext">This action cannot be undone and will also remove the associated user account.</p>
+                    <p class="modal-subtext">This action cannot be undone. The member record will be removed, but the associated user account will be preserved.</p>
                 </div>
                 <div class="modal-actions">
                     <button type="button" onclick="closeModal('deleteMemberModal')" class="btn btn-secondary">Cancel</button>

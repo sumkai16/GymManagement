@@ -9,8 +9,37 @@ $user_id = $_SESSION['user_id'] ?? null;
 $username = $_SESSION['username'] ?? 'User';
 $user_role = $_SESSION['role'] ?? 'guest';
 
-// Load sidebar configuration
-$menu_configs = require_once '../../config/sidebar_config.php';
+// Load sidebar configuration with absolute path
+$config_path = __DIR__ . '/../../config/sidebar_config.php';
+if (file_exists($config_path)) {
+    $menu_configs = include $config_path;
+} else {
+    // Fallback configuration if file not found
+    $menu_configs = [
+        'admin' => [
+            'title' => 'Admin Dashboard',
+            'welcome_text' => 'Welcome,',
+            'items' => [
+                [
+                    'icon' => 'bx-home-alt',
+                    'text' => 'Dashboard',
+                    'url' => 'admin_dashboard.php'
+                ]
+            ]
+        ],
+        'guest' => [
+            'title' => 'Guest Dashboard',
+            'welcome_text' => 'Welcome,',
+            'items' => [
+                [
+                    'icon' => 'bx-home-alt',
+                    'text' => 'Home',
+                    'url' => '#home'
+                ]
+            ]
+        ]
+    ];
+}
 
 // Get current role configuration
 $current_config = $menu_configs[$user_role] ?? $menu_configs['guest'];
@@ -43,52 +72,54 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="menu-bar">
         <div class="menu">
             <ul class="menu-links">
-                <?php foreach ($current_config['items'] as $item): ?>
-                    <?php 
-                    $is_active = false;
-                    if (isset($item['active']) && $item['active']) {
-                        $is_active = true;
-                    } elseif (isset($item['url']) && basename($item['url']) === $current_page) {
-                        $is_active = true;
-                    }
-                    
-                    // Check if any submenu item is active
-                    if (isset($item['submenu'])) {
-                        foreach ($item['submenu'] as $subitem) {
-                            if (isset($subitem['url']) && basename($subitem['url']) === $current_page) {
-                                $is_active = true;
-                                break;
+                <?php if (isset($current_config['items']) && is_array($current_config['items'])): ?>
+                    <?php foreach ($current_config['items'] as $item): ?>
+                        <?php
+                        $is_active = false;
+                        if (isset($item['active']) && $item['active']) {
+                            $is_active = true;
+                        } elseif (isset($item['url']) && basename($item['url']) === $current_page) {
+                            $is_active = true;
+                        }
+
+                        // Check if any submenu item is active
+                        if (isset($item['submenu'])) {
+                            foreach ($item['submenu'] as $subitem) {
+                                if (isset($subitem['url']) && basename($subitem['url']) === $current_page) {
+                                    $is_active = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    ?>
-                    
-                    <?php if (isset($item['type']) && $item['type'] === 'dropdown'): ?>
-                        <!-- Dropdown Menu Item -->
-                        <li class="nav-link <?php echo $is_active ? 'active' : ''; ?>">
-                            <button class="dropdown-btn">
-                                <i class='bx <?php echo htmlspecialchars($item['icon']); ?> icon'></i>
-                                <span class="text nav-text"><?php echo htmlspecialchars($item['text']); ?></span>
-                                <i class='bx bx-chevron-down dropdown-arrow'></i>
-                            </button>
-                        </li>
-                        <div class="dropdown-container">
-                            <?php foreach ($item['submenu'] as $subitem): ?>
-                                <a href="<?php echo htmlspecialchars($subitem['url']); ?>">
-                                    <span class="text nav-text"><?php echo htmlspecialchars($subitem['text']); ?></span>
+                        ?>
+
+                        <?php if (isset($item['type']) && $item['type'] === 'dropdown'): ?>
+                            <!-- Dropdown Menu Item -->
+                            <li class="nav-link <?php echo $is_active ? 'active' : ''; ?>">
+                                <button class="dropdown-btn">
+                                    <i class='bx <?php echo htmlspecialchars($item['icon']); ?> icon'></i>
+                                    <span class="text nav-text"><?php echo htmlspecialchars($item['text']); ?></span>
+                                    <i class='bx bx-chevron-down dropdown-arrow'></i>
+                                </button>
+                            </li>
+                            <div class="dropdown-container">
+                                <?php foreach ($item['submenu'] as $subitem): ?>
+                                    <a href="<?php echo htmlspecialchars($subitem['url']); ?>">
+                                        <span class="text nav-text"><?php echo htmlspecialchars($subitem['text']); ?></span>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <!-- Regular Menu Item -->
+                            <li class="nav-link <?php echo $is_active ? 'active' : ''; ?>">
+                                <a href="<?php echo htmlspecialchars($item['url']); ?>">
+                                    <i class='bx <?php echo htmlspecialchars($item['icon']); ?> icon'></i>
+                                    <span class="text nav-text"><?php echo htmlspecialchars($item['text']); ?></span>
                                 </a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <!-- Regular Menu Item -->
-                        <li class="nav-link <?php echo $is_active ? 'active' : ''; ?>">
-                            <a href="<?php echo htmlspecialchars($item['url']); ?>">
-                                <i class='bx <?php echo htmlspecialchars($item['icon']); ?> icon'></i>
-                                <span class="text nav-text"><?php echo htmlspecialchars($item['text']); ?></span>
-                            </a>
-                        </li>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </ul>
         </div>
         

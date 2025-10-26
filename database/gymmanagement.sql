@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2025 at 01:44 AM
+-- Generation Time: Oct 26, 2025 at 10:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -67,6 +67,13 @@ CREATE TABLE `members` (
   `status` enum('active','inactive') DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `members`
+--
+
+INSERT INTO `members` (`member_id`, `user_id`, `full_name`, `email`, `phone`, `address`, `membership_type`, `start_date`, `end_date`, `status`) VALUES
+(4, 19, 'Arl Sison', 'arlsison@gmail.com', '9877654325', 'san vicente 4, tunghaan, minglanilla, cebu', 'monthly', '2025-12-25', '2026-12-06', 'active');
+
 -- --------------------------------------------------------
 
 --
@@ -111,7 +118,8 @@ CREATE TABLE `trainers` (
   `full_name` varchar(100) NOT NULL,
   `specialty` varchar(100) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL
+  `email` varchar(100) DEFAULT NULL,
+  `image` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -134,9 +142,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `password`, `role`, `created_at`, `status`) VALUES
-(10, 'admin', '$2y$10$AUG1ftAJ8uVkFdFmmMqpdOStnJsKJaEavhfZOZSdAuImIaDI9eCMa', 'member', '2025-10-05 06:05:15', 'active'),
-(13, 'guest', '$2y$10$vnJCy2J/jSERZRJOzaGWruQcfGtlKmebsERQmjSI/.EW0sIgT9dCW', 'guest', '2025-10-07 13:10:01', 'active'),
-(14, 'member', '$2y$10$IDbNhnZOSBnu9McC6s/TzeAHA8MYwA1ieaysH.pUq/iawcIB.VtLS', 'member', '2025-10-07 14:23:59', 'active');
+(14, 'member', '$2y$10$IDbNhnZOSBnu9McC6s/TzeAHA8MYwA1ieaysH.pUq/iawcIB.VtLS', 'member', '2025-10-07 14:23:59', 'active'),
+(15, 'admin1', '$2y$10$IDbNhnZOSBnu9McC6s/TzeAHA8MYwA1ieaysH.pUq/iawcIB.VtLS', 'admin', '2025-10-08 07:37:53', 'active'),
+(16, 'trainer', '$2y$10$FA4MQoWAVj8Fd9teyUJHi.osq4CV3RhDSDKotrV3tKoLo0dn7WQda', 'guest', '2025-10-08 11:25:13', 'active'),
+(18, 'axcee', '$2y$10$M8RjJ/r9lBMEvZAuzvVuU.P.hauTrA8gSUTHG8/IdBGc6xbTtD6FC', 'member', '2025-10-26 05:40:40', 'active'),
+(19, 'arl', '$2y$10$FXtwBNH8DlFXGfHRetZDf.BYk14QYCt3fsLD/eEoGAJ1fCUsyk89W', 'member', '2025-10-26 05:41:48', 'active');
 
 -- --------------------------------------------------------
 
@@ -299,7 +309,7 @@ ALTER TABLE `exercises`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `member_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `member_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `nutrition_logs`
@@ -317,13 +327,13 @@ ALTER TABLE `supplement_logs`
 -- AUTO_INCREMENT for table `trainers`
 --
 ALTER TABLE `trainers`
-  MODIFY `trainer_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `trainer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `workouts`
