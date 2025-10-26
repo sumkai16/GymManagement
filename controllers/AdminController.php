@@ -207,29 +207,11 @@ class AdminController {
         return $this->memberModel->getUsersWithoutMembers();
     }
 
-    public function getAllTrainers($filter_specialty = null, $sort_by = 'full_name', $sort_order = 'ASC') {
-        return $this->trainerModel->getAllTrainers($filter_specialty, $sort_by, $sort_order);
-    }
 
-    public function addTrainer($user_id = null, $username = null, $password = null, $full_name, $specialty, $phone, $email, $image = null) {
-        return $this->trainerModel->addTrainer($user_id, $username, $password, $full_name, $specialty, $phone, $email, $image);
-    }
 
-    public function updateTrainer($trainer_id, $full_name, $specialty, $phone, $email, $image = null) {
-        return $this->trainerModel->updateTrainer($trainer_id, $full_name, $specialty, $phone, $email, $image);
-    }
 
-    public function deleteTrainer($trainer_id) {
-        return $this->trainerModel->deleteTrainer($trainer_id);
-    }
 
-    public function getTrainerById($trainer_id) {
-        return $this->trainerModel->getTrainerById($trainer_id);
-    }
 
-    public function getUsersWithoutTrainers() {
-        return $this->trainerModel->getUsersWithoutTrainers();
-    }
 
     public function getDashboardStats() {
         try {
