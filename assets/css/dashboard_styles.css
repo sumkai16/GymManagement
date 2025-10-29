@@ -308,3 +308,10 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.sidebar .menu-bar {
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+    scrollbar-width: thin;
+    scrollbar-color: #c8c8c8 #f3f3f3;
+}

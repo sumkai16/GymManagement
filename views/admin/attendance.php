@@ -46,6 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             header("Location: attendance.php");
             exit;
+
+        case 'check_in_guest':
+            $result = $adminController->checkInGuest(
+                trim($_POST['guest_name'] ?? ''),
+                trim($_POST['guest_contact'] ?? '')
+            );
+            if ($result['success']) {
+                $_SESSION['success'] = $result['message'];
+            } else {
+                $_SESSION['error'] = $result['message'];
+            }
+            header("Location: attendance.php");
+            exit;
     }
 }
 
@@ -135,14 +148,21 @@ $username = $_SESSION['username'] ?? 'Admin';
                     <i class='bx bx-plus'></i> Check-in Member
                 </button>
 
+                <!-- Add button for guest check-in next to member check-in -->
+                <button class="add-user-btn" onclick="openGuestCheckInModal()">
+                    <i class='bx bx-user'></i> Check-in Guest
+                </button>
+
                 <!-- Filters and Sorting -->
                 <div class="filters-section" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
                     <div class="filters-row" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                         <input type="date" id="filter_date" onchange="applyFilters()" value="<?php echo $filter_date; ?>" style="padding: 8px 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; background: #fff;">
 
                         <select id="filter_member" onchange="applyFilters()" style="padding: 8px 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; background: #fff; min-width: 140px;">
-                            <option value="" disabled <?php echo (empty($filter_member)) ? 'selected' : ''; ?>>Filter by Member</option>
-                            <option value="">All Members</option>
+                            <option value="" disabled <?php echo (empty($filter_member)) ? 'selected' : ''; ?>>Filter by</option>
+                            <option value="">All (Members and Guests)</option>
+                            <option value="member" <?php echo ($filter_member === 'member') ? 'selected' : ''; ?>>Members Only</option>
+                            <option value="guest" <?php echo ($filter_member === 'guest') ? 'selected' : ''; ?>>Guests Only</option>
                             <?php foreach ($members as $member): ?>
                                 <option value="<?php echo $member['member_id']; ?>" <?php echo ($filter_member == $member['member_id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($member['full_name']); ?>
@@ -182,7 +202,8 @@ $username = $_SESSION['username'] ?? 'Admin';
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Member</th>
+                            <th>User ID</th>
+                            <th>Full Name</th>
                             <th>Check-in</th>
                             <th>Check-out</th>
                             <th>Duration</th>
@@ -194,6 +215,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <?php foreach ($attendance as $record): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($record['attendance_id']); ?></td>
+                            <td><?php echo htmlspecialchars($record['user_id']); ?></td>
                             <td><?php echo htmlspecialchars($record['full_name']); ?></td>
                             <td><?php echo htmlspecialchars(date('H:i', strtotime($record['check_in']))); ?></td>
                             <td><?php echo $record['check_out'] ? htmlspecialchars(date('H:i', strtotime($record['check_out']))) : 'N/A'; ?></td>
@@ -219,9 +241,6 @@ $username = $_SESSION['username'] ?? 'Admin';
                                             <i class='bx bx-log-out'></i> Check Out
                                         </button>
                                     <?php endif; ?>
-                                    <button class="action-btn btn-delete" onclick="openDeleteAttendanceModal(<?php echo $record['attendance_id']; ?>, '<?php echo htmlspecialchars($record['full_name']); ?>')" title="Delete Record">
-                                        <i class='bx bx-trash'></i> Delete
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -305,6 +324,33 @@ $username = $_SESSION['username'] ?? 'Admin';
         </div>
     </div>
 
+    <!-- Guest Check-in Modal -->
+    <div id="guestCheckInModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-user'></i>
+          <h3>Check-in Guest</h3>
+        </div>
+        <form method="POST" action="attendance.php">
+          <input type="hidden" name="action" value="check_in_guest">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="guest_name">Name (required):</label>
+              <input type="text" id="guest_name" name="guest_name" required>
+            </div>
+            <div class="form-group">
+              <label for="guest_contact">Contact (optional):</label>
+              <input type="text" id="guest_contact" name="guest_contact">
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" onclick="closeModal('guestCheckInModal')" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Check In</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
         function applyFilters() {
             const filterDate = document.getElementById('filter_date').value;
@@ -343,13 +389,17 @@ $username = $_SESSION['username'] ?? 'Admin';
             document.getElementById('deleteAttendanceModal').style.display = 'block';
         }
 
+        function openGuestCheckInModal(){
+          document.getElementById('guestCheckInModal').style.display = 'block';
+        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
 
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modals = ['checkInModal', 'checkOutModal', 'deleteAttendanceModal'];
+            const modals = ['checkInModal', 'checkOutModal', 'deleteAttendanceModal', 'guestCheckInModal'];
             modals.forEach(modalId => {
                 const modal = document.getElementById(modalId);
                 if (event.target === modal) {

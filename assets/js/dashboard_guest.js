@@ -28,16 +28,23 @@ const toggle = body.querySelector(".toggle");
 const mobileMenuToggle = document.getElementById("mobileMenuToggle");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-// Desktop sidebar toggle functionality
-toggle.addEventListener("click", () => {
-    debugLog('Desktop sidebar toggle clicked');
-    sidebar.classList.toggle("close");
-    debugLog('Sidebar state:', sidebar.classList.contains('close') ? 'closed' : 'open');
-});
+// Make sidebar scrollable
+if (sidebar) sidebar.style.overflowY = "auto";
+
+// Desktop sidebar toggle functionality - only toggle on arrow
+if (toggle) {
+    toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        debugLog('Desktop sidebar toggle clicked');
+        sidebar.classList.toggle("close");
+        debugLog('Sidebar state:', sidebar.classList.contains('close') ? 'closed' : 'open');
+    });
+}
 
 // Mobile menu toggle functionality
 if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener("click", () => {
+    mobileMenuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
         debugLog('Mobile menu toggle clicked');
         sidebar.classList.toggle("open");
         sidebarOverlay.classList.toggle("active");
@@ -54,6 +61,14 @@ if (sidebarOverlay) {
         debugLog('Mobile menu closed via overlay');
     });
 }
+
+// Prevent sidebar toggle on sidebar nav link clicks
+sidebar.querySelectorAll('.nav-link a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // do not toggle sidebar
+    });
+});
 
 // Handle window resize
 window.addEventListener("resize", () => {

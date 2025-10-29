@@ -1,9 +1,23 @@
 const body= document.querySelector("body"),
-    sidebar = body.querySelector(".sidebar");
+    sidebar = body.querySelector(".sidebar"),
     toggle = body.querySelector(".toggle");
 
-toggle.addEventListener("click", () =>{
-    sidebar.classList.toggle("close");
+// Make sidebar scrollable
+if (sidebar) sidebar.style.overflowY = "auto";
+
+// Ensure sidebar only toggles on arrow (toggle) click
+if (toggle) {
+    toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle("close");
+    });
+}
+
+// Prevent nav link clicks from toggling sidebar
+sidebar.querySelectorAll('.nav-link a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 });
 
 // Loop through all dropdown buttons to toggle between hiding and showing its dropdown content

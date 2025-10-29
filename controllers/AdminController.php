@@ -1061,17 +1061,20 @@ class AdminController {
         try {
             $where_clauses = [];
             $params = [];
-
             if ($filter_date) {
                 $where_clauses[] = "DATE(a.check_in) = :filter_date";
                 $params[':filter_date'] = $filter_date;
             }
-
             if ($filter_member) {
-                $where_clauses[] = "a.user_id = :filter_member";
-                $params[':filter_member'] = $filter_member;
+                if ($filter_member === 'guest') {
+                    $where_clauses[] = "(a.user_id IS NULL OR a.user_id = 0)";
+                } else if ($filter_member === 'member') {
+                    $where_clauses[] = "(a.user_id IS NOT NULL AND a.user_id > 0)";
+                } else {
+                    $where_clauses[] = "a.user_id = :filter_member";
+                    $params[':filter_member'] = $filter_member;
+                }
             }
-
             if ($filter_status) {
                 if ($filter_status === 'checked_in') {
                     $where_clauses[] = "a.check_out IS NULL";
@@ -1079,23 +1082,17 @@ class AdminController {
                     $where_clauses[] = "a.check_out IS NOT NULL";
                 }
             }
-
             $where_sql = !empty($where_clauses) ? "WHERE " . implode(" AND ", $where_clauses) : "";
-
             $valid_sort_columns = ['attendance_id', 'check_in', 'check_out', 'full_name', 'duration'];
             if (!in_array($sort_by, $valid_sort_columns)) {
                 $sort_by = 'check_in';
             }
-
             $sort_order = strtoupper($sort_order) === 'ASC' ? 'ASC' : 'DESC';
-
-            $sql = "SELECT a.*, m.full_name FROM attendance a JOIN members m ON a.user_id = m.user_id $where_sql ORDER BY a.$sort_by $sort_order";
+            $sql = "SELECT a.attendance_id, a.user_id, COALESCE(m.full_name, a.full_name) AS full_name, a.check_in, a.check_out FROM attendance a LEFT JOIN members m ON a.user_id = m.user_id $where_sql ORDER BY a.$sort_by $sort_order";
             $stmt = $this->db->prepare($sql);
-
             foreach ($params as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
-
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -1196,16 +1193,14 @@ class AdminController {
 
     public function getTodayAttendanceStats() {
         try {
-            // Get total check-ins today
+            // Get total check-ins today (all, not just members)
             $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM attendance WHERE DATE(check_in) = CURDATE()");
             $stmt->execute();
             $totalCheckIns = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
-
-            // Get currently in gym
+            // Get currently in gym (all, not just members)
             $stmt = $this->db->prepare("SELECT COUNT(*) as current FROM attendance WHERE DATE(check_in) = CURDATE() AND check_out IS NULL");
             $stmt->execute();
             $currentlyInGym = $stmt->fetch(PDO::FETCH_ASSOC)['current'] ?? 0;
-
             // Get peak hour
             $stmt = $this->db->prepare("
                 SELECT HOUR(check_in) as hour, COUNT(*) as count 
@@ -1218,7 +1213,6 @@ class AdminController {
             $stmt->execute();
             $peakHour = $stmt->fetch(PDO::FETCH_ASSOC);
             $peakHourText = $peakHour ? $peakHour['hour'] . ':00' : 'N/A';
-
             // Get average duration
             $stmt = $this->db->prepare("
                 SELECT AVG(TIMESTAMPDIFF(MINUTE, check_in, check_out)) as avg_duration 
@@ -1227,7 +1221,6 @@ class AdminController {
             ");
             $stmt->execute();
             $avgDuration = $stmt->fetch(PDO::FETCH_ASSOC)['avg_duration'] ?? 0;
-
             return [
                 'total_check_ins' => $totalCheckIns,
                 'currently_in_gym' => $currentlyInGym,
@@ -1395,15 +1388,20 @@ class AdminController {
         }
     }
 
-    public function getExerciseById($exercise_id) {
+    public function checkInGuest($guest_name, $guest_contact = null) {
         try {
-            $stmt = $this->db->prepare("SELECT * FROM exercises WHERE exercise_id = :exercise_id");
-            $stmt->bindParam(':exercise_id', $exercise_id, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$guest_name) {
+                return ['success' => false, 'message' => 'Guest name is required'];
+            }
+            $stmt = $this->db->prepare("INSERT INTO attendance (user_id, full_name, check_in) VALUES (NULL, :full_name, NOW())");
+            $stmt->bindParam(':full_name', $guest_name);
+            if ($stmt->execute()) {
+                return ['success' => true, 'message' => 'Guest checked in successfully'];
+            }
+            return ['success' => false, 'message' => 'Failed to check in guest'];
         } catch (PDOException $e) {
-            error_log("Get exercise by ID error: " . $e->getMessage());
-            return false;
+            error_log("Check in guest error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Database error'];
         }
     }
 }

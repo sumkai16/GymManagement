@@ -10,9 +10,24 @@ return [
         'welcome_text' => 'Welcome,',
         'items' => [
             [
+                'type' => 'section',
+                'label' => 'Overview'
+            ],
+            [
                 'icon' => 'bx-home-alt',
                 'text' => 'Dashboard',
                 'url' => 'admin_dashboard.php',
+                'permissions' => ['admin']
+            ],
+
+            [
+                'type' => 'section',
+                'label' => 'People'
+            ],
+            [
+                'icon' => 'bx-user',
+                'text' => 'Users',
+                'url' => 'users.php',
                 'permissions' => ['admin']
             ],
             [
@@ -22,22 +37,32 @@ return [
                 'permissions' => ['admin']
             ],
             [
-                'icon' => 'bx-user',
-                'text' => 'Users',
-                'url' => 'users.php',
-                'permissions' => ['admin']
-            ],
-            [
                 'icon' => 'bx-dumbbell',
                 'text' => 'Trainers',
                 'url' => 'trainers.php',
                 'permissions' => ['admin']
             ],
+
             [
-                'icon' => 'bx-credit-card',
-                'text' => 'Payments',
-                'url' => 'payments.php',
+                'type' => 'section',
+                'label' => 'Operations'
+            ],
+            [
+                'icon' => 'bx-calendar-check',
+                'text' => 'Attendance',
+                'url' => 'attendance.php',
                 'permissions' => ['admin']
+            ],
+            [
+                'icon' => 'bx-dumbbell',
+                'text' => 'Exercise Manager',
+                'url' => 'exercises.php',
+                'permissions' => ['admin']
+            ],
+
+            [
+                'type' => 'section',
+                'label' => 'Insights & Settings'
             ],
             [
                 'icon' => 'bx-chart',

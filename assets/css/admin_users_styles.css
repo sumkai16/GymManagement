@@ -161,6 +161,32 @@ body {
     transform: translateY(-1px);
 }
 
+.action-btn.btn-edit {
+    background: var(--primary-color, #21b9c5);
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s, filter 0.2s, transform 0.12s;
+    box-shadow: 0 2px 8px rgba(33,185,197,0.09);
+    letter-spacing: 0.03em;
+}
+.action-btn.btn-edit i {
+    font-size: 1.3em;
+    font-weight: 700;
+}
+.action-btn.btn-edit:hover {
+    background: #1798a4;
+    filter: brightness(1.10);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 5px 18px rgba(33,185,197,0.17);
+}
+
 /* Add User Button */
 .add-user-btn {
     background: var(--primary-color);

@@ -31,7 +31,8 @@ CREATE TABLE `attendance` (
   `attendance_id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `full_name` varchar(100) DEFAULT NULL,
-  `check_in` datetime DEFAULT current_timestamp()
+  `check_in` datetime DEFAULT current_timestamp(),
+  `check_out` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

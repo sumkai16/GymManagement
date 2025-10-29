@@ -46,6 +46,15 @@ $current_config = $menu_configs[$user_role] ?? $menu_configs['guest'];
 
 // Determine the current page for active state
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Determine dashboard URL based on config
+$dashboard_url = 'index.php';
+foreach ($current_config['items'] as $item) {
+    if (isset($item['text']) && stripos($item['text'], 'dashboard') !== false) {
+        $dashboard_url = $item['url'];
+        break;
+    }
+}
 ?>
 
 <!-- Mobile Menu Toggle -->
@@ -60,7 +69,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <nav class="sidebar close" id="dynamicSidebar">
     <header>
         <div class="logo">
-            <img src="../../assets/images/logo.png" alt="Logo" width="150">
+            <a href="<?php echo htmlspecialchars($dashboard_url); ?>">
+                <img src="../../assets/images/logo.png" alt="Logo" width="150">
+            </a>
             <div class="text">
                 <span class="welcome">Welcome,</span>
                 <span class="member-name"><?php echo htmlspecialchars($username); ?>!</span>
@@ -72,54 +83,50 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="menu-bar">
         <div class="menu">
             <ul class="menu-links">
-                <?php if (isset($current_config['items']) && is_array($current_config['items'])): ?>
-                    <?php foreach ($current_config['items'] as $item): ?>
-                        <?php
-                        $is_active = false;
-                        if (isset($item['active']) && $item['active']) {
-                            $is_active = true;
-                        } elseif (isset($item['url']) && basename($item['url']) === $current_page) {
-                            $is_active = true;
+                <?php
+                $current_section = null;
+                $section_count = 0;
+                foreach ($current_config['items'] as $idx => $item) {
+                    if (isset($item['type']) && $item['type'] === 'section') {
+                        if ($current_section !== null) {
+                            // Close last section's items group
+                            echo "</ul>\n";
                         }
-
-                        // Check if any submenu item is active
-                        if (isset($item['submenu'])) {
-                            foreach ($item['submenu'] as $subitem) {
-                                if (isset($subitem['url']) && basename($subitem['url']) === $current_page) {
-                                    $is_active = true;
-                                    break;
-                                }
-                            }
+                        $current_section = $item['label'];
+                        $section_id = "collapsible-section-$section_count";
+                        echo "<li class=\"menu-section collapsible-header\" data-collapse='#$section_id'>"
+                            . "<span class=\"section-label\">" . htmlspecialchars($current_section) . "</span>"
+                            . "<span class='collapse-arrow'>&#9660;</span>"
+                            . "</li>\n";
+                        echo "<ul class='menu-collapsible' id='$section_id'>\n";
+                        $section_count++;
+                        continue;
+                    }
+                    // Render normal or dropdown menu entries
+                    $is_active = isset($item['active']) && $item['active'];
+                    if (isset($item['url']) && basename($item['url']) === $current_page) $is_active = true;
+                    if (isset($item['submenu'])) {
+                        foreach ($item['submenu'] as $subitem) {
+                            if (isset($subitem['url']) && basename($subitem['url']) === $current_page) $is_active = true;
                         }
-                        ?>
-
-                        <?php if (isset($item['type']) && $item['type'] === 'dropdown'): ?>
-                            <!-- Dropdown Menu Item -->
-                            <li class="nav-link <?php echo $is_active ? 'active' : ''; ?>">
-                                <button class="dropdown-btn">
-                                    <i class='bx <?php echo htmlspecialchars($item['icon']); ?> icon'></i>
-                                    <span class="text nav-text"><?php echo htmlspecialchars($item['text']); ?></span>
-                                    <i class='bx bx-chevron-down dropdown-arrow'></i>
-                                </button>
-                            </li>
-                            <div class="dropdown-container">
-                                <?php foreach ($item['submenu'] as $subitem): ?>
-                                    <a href="<?php echo htmlspecialchars($subitem['url']); ?>">
-                                        <span class="text nav-text"><?php echo htmlspecialchars($subitem['text']); ?></span>
-                                    </a>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <!-- Regular Menu Item -->
-                            <li class="nav-link <?php echo $is_active ? 'active' : ''; ?>">
-                                <a href="<?php echo htmlspecialchars($item['url']); ?>">
-                                    <i class='bx <?php echo htmlspecialchars($item['icon']); ?> icon'></i>
-                                    <span class="text nav-text"><?php echo htmlspecialchars($item['text']); ?></span>
-                                </a>
-                            </li>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    }
+                    if (isset($item['type']) && $item['type'] === 'dropdown') {
+                        // Dropdown logic as before
+                        echo "<li class=\"nav-link " . ($is_active ? 'active' : '') . "\">";
+                        echo "<button class='dropdown-btn'><i class='bx " . htmlspecialchars($item['icon']) . " icon'></i><span class='text nav-text'>" . htmlspecialchars($item['text']) . "</span><i class='bx bx-chevron-down dropdown-arrow'></i></button></li>\n";
+                        echo "<div class='dropdown-container'>";
+                        foreach ($item['submenu'] as $subitem) {
+                            echo "<a href='" . htmlspecialchars($subitem['url']) . "'><span class='text nav-text'>" . htmlspecialchars($subitem['text']) . "</span></a>\n";
+                        }
+                        echo "</div>\n";
+                    } else {
+                        echo "<li class=\"nav-link " . ($is_active ? 'active' : '') . "\"><a href=\"" . htmlspecialchars($item['url']) . "\" data-tooltip=\"" . htmlspecialchars($item['text']) . "\"><i class='bx " . htmlspecialchars($item['icon']) . " icon'></i><span class='text nav-text'>" . htmlspecialchars($item['text']) . "</span></a></li>\n";
+                    }
+                }
+                if ($current_section !== null) {
+                    echo "</ul>\n";
+                }
+                ?>
             </ul>
         </div>
         
@@ -155,6 +162,44 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <!-- Include Modal Styles -->
 <link rel="stylesheet" href="../../assets/css/modal_styles.css">
+<style>
+.sidebar .menu-bar {
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+}
+.menu-section.collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.2s;
+}
+.menu-section.collapsible-header:hover {
+    background: #ececec;
+}
+.menu-section .collapse-arrow {
+    transition: transform 0.25s cubic-bezier(.4,2,.41,.86);
+    font-size: 13px;
+    margin-left: 8px;
+}
+.menu-section.collapsed .collapse-arrow {
+    transform: rotate(-90deg)
+}
+.menu-collapsible {
+    display: block;
+    padding: 0;
+    margin: 0;
+    transition: max-height 0.35s cubic-bezier(.4,2,.41,.86), opacity 0.18s linear;
+    max-height: 1200px;
+    opacity: 1;
+    overflow: hidden;
+}
+.menu-collapsible.collapsed {
+    max-height: 0;
+    opacity: 0.4;
+}
+</style>
 
 <!-- Include the dynamic sidebar JavaScript -->
 <script>
@@ -362,4 +407,12 @@ window.onclick = function(event) {
         closeLogoutModal();
     }
 }
+document.querySelectorAll('.menu-section.collapsible-header').forEach(function(section){
+    section.addEventListener('click', function(){
+        const collapseId = section.getAttribute('data-collapse');
+        const group = document.querySelector(collapseId);
+        section.classList.toggle('collapsed');
+        group.classList.toggle('collapsed');
+    });
+});
 </script>
