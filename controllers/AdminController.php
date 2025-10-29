@@ -1404,5 +1404,44 @@ class AdminController {
             return ['success' => false, 'message' => 'Database error'];
         }
     }
+
+    public function updateCurrentAdmin($user_id, $username, $new_password = null) {
+        // Validate input
+        if (empty($user_id) || empty($username)) {
+            return ['success' => false, 'message' => 'Username is required'];
+        }
+        try {
+            // Check if username is taken by another user
+            $stmt = $this->db->prepare("SELECT user_id FROM users WHERE username = :username AND user_id != :user_id");
+            $stmt->bindParam(':username', $username);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            if ($stmt->fetch()) {
+                return ['success' => false, 'message' => 'Username already exists'];
+            }
+            // Build SQL
+            if ($new_password) {
+                $hash = password_hash($new_password, PASSWORD_BCRYPT);
+                $stmt = $this->db->prepare("UPDATE users SET username = :username, password = :password WHERE user_id = :user_id");
+                $stmt->bindParam(':username', $username);
+                $stmt->bindParam(':password', $hash);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            } else {
+                $stmt = $this->db->prepare("UPDATE users SET username = :username WHERE user_id = :user_id");
+                $stmt->bindParam(':username', $username);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            }
+            if ($stmt->execute()) {
+                // Update session username if change was successful
+                if (session_status() === PHP_SESSION_NONE) session_start();
+                $_SESSION['username'] = $username;
+                return ['success' => true, 'message' => 'Account updated successfully'];
+            }
+            return ['success' => false, 'message' => 'Failed to update account'];
+        } catch (PDOException $e) {
+            error_log("Update admin error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Database error'];
+        }
+    }
 }
 ?>
