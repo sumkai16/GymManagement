@@ -1,3 +1,123 @@
+/* FitNexus/MATCHES landing.css root colors */
+:root {
+    --blue-main: #1a9ba8;
+    --blue-accent: #4dd0e1;
+    --blue-bg: #f8fafc;
+}
+/* Override backgrounds for login/register pages */
+body {
+    background:
+        radial-gradient(circle at 20% 80%, rgba(26,155,168,0.11) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(77,208,225,0.10) 0%, transparent 50%),
+        linear-gradient(135deg, var(--blue-bg) 0%, #ffffff 100%) !important;
+}
+/* Main login/register container styling */
+.auth-container {
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1.5px solid #e0f7fa !important;
+    border-radius: 24px;
+    box-shadow:
+        0 6px 28px rgba(26,155,168,0.09),
+        0 1.5px 6px rgba(0,0,0,0.04),
+        inset 0 1px 0 rgba(255,255,255,0.11);
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    overflow: hidden;
+}
+.logo-section h1 {
+    color: var(--blue-main);
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+.logo-section h1 i {
+    color: var(--blue-accent);
+    margin-right: .5em;
+}
+.logo-section p {
+    color: #4a5568;
+    font-size: 1rem;
+    font-weight: 500;
+}
+/* Auth input styling */
+.form-group input {
+    background: rgba(255,255,255,0.85) !important;
+    color: var(--blue-main) !important;
+    border: 2px solid #b2ebf2 !important;
+    border-radius: 12px;
+    padding: 15px 20px;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+.form-group input:focus {
+    outline: none;
+    border-color: var(--blue-accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(77,208,225,0.12);
+    transform: translateY(-2px);
+}
+.form-group input::placeholder {
+    color: #a0aec0;
+    font-size: 0.94rem;
+}
+.form-group input:focus::placeholder {
+    color: #48979e;
+}
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(90deg, var(--blue-main) 60%, var(--blue-accent) 100%) !important;
+    color: #fff !important;
+    border: none;
+    border-radius: 22px;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 22px rgba(77,208,225,0.12);
+    transition: background 0.2s;
+}
+.submit-btn:hover {
+    background: linear-gradient(90deg, var(--blue-accent) 60%, var(--blue-main) 100%) !important;
+}
+.auth-links a {
+    color: var(--blue-accent);
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+.auth-links a:hover {
+    color: var(--blue-main);
+}
+/* Retain old structure for consistency */
+.flash {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.18);
+}
+.success-flash {
+    background: linear-gradient(135deg, #51cf66, #40c057);
+    box-shadow: 0 5px 15px rgba(81, 207, 102, 0.13);
+}
+.error-flash {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.16);
+}
+/* Responsive Tweaks */
+@media (max-width:480px) {
+    .auth-container { padding: 30px 12px; }
+    .logo-section h1 { font-size: 2rem; }
+    .form-group input { padding: 12px 12px; }
+    .submit-btn { padding: 12px; }
+}
+
 * {
     margin: 0;
     padding: 0;

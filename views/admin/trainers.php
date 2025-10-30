@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['username'] ?? null,
                 $_POST['password'] ?? null,
                 $_POST['full_name'] ?? '',
-                $_POST['specialty'] ?? '',
-                $_POST['phone'] ?? '',
                 $_POST['email'] ?? '',
+                $_POST['phone'] ?? '',
+                $_POST['specialty'] ?? '',
                 $_FILES['image'] ?? null
             );
             if ($result['success']) {
@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $adminController->updateTrainer(
                 $_POST['trainer_id'] ?? 0,
                 $_POST['full_name'] ?? '',
-                $_POST['specialty'] ?? '',
-                $_POST['phone'] ?? '',
                 $_POST['email'] ?? '',
+                $_POST['phone'] ?? '',
+                $_POST['specialty'] ?? '',
                 $_FILES['image'] ?? null
             );
             if ($result['success']) {
@@ -140,15 +140,15 @@ $username = $_SESSION['username'] ?? 'Admin';
 
             <!-- Trainers Table -->
             <div class="card">
-                <table class="users-table">
+                <table class="users-table" id="trainersTable">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
                             <th>Specialty</th>
                             <th>Email</th>
-                            <th>Phone</th>
-                            <th>Actions</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -162,16 +162,19 @@ $username = $_SESSION['username'] ?? 'Admin';
                                 </span>
                             </td>
                             <td><?php echo htmlspecialchars($trainer['email']); ?></td>
-                            <td><?php echo htmlspecialchars($trainer['phone'] ?? 'N/A'); ?></td>
                             <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn btn-edit" onclick="openEditTrainerModal(<?php echo $trainer['trainer_id']; ?>, '<?php echo htmlspecialchars($trainer['full_name']); ?>', '<?php echo htmlspecialchars($trainer['specialty'] ?? ''); ?>', '<?php echo htmlspecialchars($trainer['phone'] ?? ''); ?>', '<?php echo htmlspecialchars($trainer['email']); ?>')" title="Edit Trainer">
-                                        <i class='bx bx-edit'></i> Edit
-                                    </button>
-                                    <button class="action-btn btn-delete" onclick="openDeleteTrainerModal(<?php echo $trainer['trainer_id']; ?>, '<?php echo htmlspecialchars($trainer['full_name']); ?>')" title="Delete Trainer">
-                                        <i class='bx bx-trash'></i> Delete
-                                    </button>
-                                </div>
+                                <button class="action-btn btn-edit"
+                                    onclick="openEditTrainerModal(<?php echo $trainer['trainer_id']; ?>, '<?php echo htmlspecialchars($trainer['full_name']); ?>', '<?php echo htmlspecialchars($trainer['specialty'] ?? ''); ?>', '<?php echo htmlspecialchars($trainer['phone'] ?? ''); ?>', '<?php echo htmlspecialchars($trainer['email']); ?>')"
+                                    title="Edit Trainer">
+                                    <i class='bx bx-edit'></i> Edit
+                                </button>
+                            </td>
+                            <td>
+                                <button class="action-btn btn-delete"
+                                    onclick="openDeleteTrainerModal(<?php echo $trainer['trainer_id']; ?>, '<?php echo htmlspecialchars($trainer['full_name']); ?>')"
+                                    title="Delete Trainer">
+                                    <i class='bx bx-trash'></i> Delete
+                                </button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -358,6 +361,15 @@ $username = $_SESSION['username'] ?? 'Admin';
                     <button type="submit" class="btn btn-primary">Delete Trainer</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Trainer Image Preview Modal -->
+    <div id="trainerImageModal" class="modal" style="display:none;align-items:center;justify-content:center;">
+        <div style="position:relative;margin:auto;background:#fff;padding:18px 18px 12px 18px;border-radius:12px;max-width:90vw;max-height:90vh;box-shadow:0 4px 32px rgba(0,0,0,.24);text-align:center;">
+            <span style="position:absolute;top:8px;right:12px;font-size:1.85rem;color:#888;cursor:pointer;" onclick="closeImagePreviewModal()">&times;</span>
+            <img id="trainerImageModalImg" src="" alt="Trainer" style="max-width:72vw;max-height:72vh;border-radius:8px;box-shadow:0 2px 12px #dde;"/>
+            <div id="trainerImageModalCaption" style="margin-top:8px;color:#444;font-weight:500;font-size:1.13rem;"></div>
         </div>
     </div>
 </div>

@@ -312,9 +312,10 @@ class AdminController {
         if (empty($full_name)) {
             return ['success' => false, 'message' => 'Full name is required'];
         }
-
-        // Validate email format if provided
-        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (empty($email)) {
+            return ['success' => false, 'message' => 'Email is required'];
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['success' => false, 'message' => 'Invalid email format'];
         }
 
@@ -332,6 +333,10 @@ class AdminController {
                     $this->db->rollBack();
                     return ['success' => false, 'message' => 'User not found or already a trainer'];
                 }
+                // Update role to 'trainer'
+                $stmt = $this->db->prepare("UPDATE users SET role = 'trainer' WHERE user_id = :user_id");
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+                $stmt->execute();
                 $final_user_id = $user_id;
             } else {
                 // Create new user
@@ -460,7 +465,7 @@ class AdminController {
 
     public function getUsersWithoutTrainers() {
         try {
-            $stmt = $this->db->prepare("SELECT user_id, username FROM users WHERE user_id NOT IN (SELECT user_id FROM trainers) AND role = 'guest'");
+            $stmt = $this->db->prepare("SELECT user_id, username FROM users WHERE user_id NOT IN (SELECT user_id FROM trainers)");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

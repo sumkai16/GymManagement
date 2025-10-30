@@ -6,6 +6,18 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 $username = $_SESSION['username'] ?? 'Admin';
+
+// Include AdminController
+require_once '../../controllers/AdminController.php';
+require_once '../../models/Member.php';
+require_once '../../models/Trainer.php';
+$memberModel = new Member();
+$trainerModel = new Trainer();
+$totalMembers = count($memberModel->getAllMembers());
+$activeTrainers = count($trainerModel->getAllTrainers());
+
+$adminController = new AdminController();
+$stats = $adminController->getDashboardStats();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +57,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-user'></i>
                     </div>
                     <div class="stat-content">
-                        <h3>150</h3>
+                        <h3><?php echo $totalMembers; ?></h3>
                         <p>Total Members</p>
                     </div>
                 </div>
@@ -54,7 +66,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-dumbbell'></i>
                     </div>
                     <div class="stat-content">
-                        <h3>8</h3>
+                        <h3><?php echo $activeTrainers; ?></h3>
                         <p>Active Trainers</p>
                     </div>
                 </div>
@@ -63,7 +75,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-credit-card'></i>
                     </div>
                     <div class="stat-content">
-                        <h3>₱45,000</h3>
+                        <h3>₱<?php echo isset($stats['monthly_revenue']) ? number_format((float)$stats['monthly_revenue'], 2) : '0.00'; ?></h3>
                         <p>Monthly Revenue</p>
                     </div>
                 </div>
@@ -72,7 +84,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <i class='bx bx-calendar'></i>
                     </div>
                     <div class="stat-content">
-                        <h3>25</h3>
+                        <h3><?php echo isset($stats['sessions_today']) ? (int)$stats['sessions_today'] : 0; ?></h3>
                         <p>Sessions Today</p>
                     </div>
                 </div>
@@ -114,9 +126,9 @@ $username = $_SESSION['username'] ?? 'Admin';
                                 <i class='bx bx-dumbbell'></i>
                                 <span>Add Trainer</span>
                             </a>
-                            <a href="payments.php" class="action-link">
-                                <i class='bx bx-credit-card'></i>
-                                <span>Record Payment</span>
+                            <a href="attendance.php" class="action-link">
+                                <i class='bxr  bx-calendar-detail'  ></i> 
+                                <span>Attendance</span>
                             </a>
                             <a href="attendance.php" class="action-link">
                                 <i class='bx bx-log-in'></i>
