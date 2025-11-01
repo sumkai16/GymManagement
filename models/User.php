@@ -92,4 +92,18 @@ class User {
             return false;
         }
     }
+
+    public function updatePasswordByUserId($user_id, $newPassword) {
+        try {
+            $query = "UPDATE users SET password = :password WHERE user_id = :user_id";
+            $stmt = $this->conn->prepare($query);
+            $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+            $stmt->bindParam(":password", $hash);
+            $stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Update password error: " . $e->getMessage());
+            return false;
+        }
+    }
 }

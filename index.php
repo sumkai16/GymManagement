@@ -16,6 +16,10 @@ if (isset($_SESSION['user_id'])) {
         exit;
     }
 }
+// Fetch trainers for the landing page
+require_once __DIR__ . '/models/Trainer.php';
+$trainerModel = new Trainer();
+$trainers = $trainerModel->getAllTrainers();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -116,37 +120,40 @@ if (isset($_SESSION['user_id'])) {
       <div class="container">
         <h2 class="section-title">Meet Our Trainers</h2>
         <div class="trainers-grid">
-          <div class="trainer-card">
-            <div class="trainer-avatar"><i class='bx bx-user-voice'></i></div>
-            <h3>Jay Aquino</h3>
-            <span class="trainer-role">Strength & Conditioning</span>
-            <p>10+ Years Experience. NASM Certified.</p>
-          </div>
-          <div class="trainer-card">
-            <div class="trainer-avatar"><i class='bx bx-user-voice'></i></div>
-            <h3>Alyssa Cruz</h3>
-            <span class="trainer-role">Yoga Instructor</span>
-            <p>Registered Yoga Teacher. Mindfulness Specialist.</p>
-          </div>
-          <div class="trainer-card">
-            <div class="trainer-avatar"><i class='bx bx-user-voice'></i></div>
-            <h3>Enrico Alvarez</h3>
-            <span class="trainer-role">HIIT & Functional Training</span>
-            <p>Certified Group Fitness Leader.</p>
-          </div>
-          <div class="trainer-card">
-            <div class="trainer-avatar"><i class='bx bx-user-voice'></i></div>
-            <h3>Karen Santos</h3>
-            <span class="trainer-role">Sports Nutrition</span>
-            <p>Body Transformation Coach.</p>
-          </div>
+          <?php if (!empty($trainers)): ?>
+            <?php foreach ($trainers as $trainer): ?>
+              <div class="trainer-card">
+                <div class="trainer-avatar">
+                  <?php 
+                    $img = isset($trainer['image']) ? trim($trainer['image']) : '';
+                    if ($img !== '') {
+                      $isAbsolute = stripos($img, 'http://') === 0 || stripos($img, 'https://') === 0 || substr($img, 0, 1) === '/';
+                      $alreadyPrefixed = strpos($img, 'assets/images/trainers/') === 0;
+                      $src = $isAbsolute || $alreadyPrefixed ? $img : ('assets/images/trainers/' . $img);
+                  ?>
+                    <img src="<?php echo htmlspecialchars($src); ?>" alt="<?php echo htmlspecialchars($trainer['full_name'] ?? 'Trainer'); ?>" class="trainer-img" loading="lazy"/>
+                  <?php } else { ?>
+                    <i class='bx bx-user-voice'></i>
+                  <?php } ?>
+                </div>
+                <h3><?php echo htmlspecialchars($trainer['full_name'] ?? ''); ?></h3>
+                <span class="trainer-role"><?php echo htmlspecialchars($trainer['specialty'] ?? ''); ?></span>
+                <p>
+                  <?php if (!empty($trainer['phone'])) { echo 'Phone: ' . htmlspecialchars($trainer['phone']); } ?>
+                  <?php if (!empty($trainer['email'])) { echo (!empty($trainer['phone']) ? '<br>' : '') . 'Email: ' . htmlspecialchars($trainer['email']); } ?>
+                </p>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <p>No trainers found.</p>
+          <?php endif; ?>
         </div>
       </div>
     </section>
 
     <section id="contact" class="section contact-section">
       <div class="container contact-container">
-        <h2 class="section-title">Contact Us</h2>
+        <h2 class="contact-title">Contact Us</h2>
         <p class="contact-prompt">Ready to start? Got questions? Reach out and join the FitNexus community!</p>
         <div class="contact-row">
           <div><i class='bx bxs-phone' style="color:var(--blue-main);"></i> 0912-345-6789</div>

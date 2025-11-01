@@ -418,6 +418,18 @@ class Member {
         }
     }
 
+    public function getMemberByUserId($user_id) {
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM members WHERE user_id = :user_id");
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get member by user_id error: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getUsersWithoutMembers() {
         try {
             $stmt = $this->conn->prepare("SELECT user_id, username FROM users WHERE user_id NOT IN (SELECT user_id FROM members) AND role = 'guest'");

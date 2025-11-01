@@ -307,112 +307,14 @@ class AdminController {
         }
     }
 
-    public function addTrainer($user_id = null, $username = null, $password = null, $full_name, $email, $phone, $specialty) {
-        // Validate input
-        if (empty($full_name)) {
-            return ['success' => false, 'message' => 'Full name is required'];
-        }
-        if (empty($email)) {
-            return ['success' => false, 'message' => 'Email is required'];
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Invalid email format'];
-        }
-
-        try {
-            // Start transaction
-            $this->db->beginTransaction();
-
-            if ($user_id) {
-                // Use existing user
-                // Check if user exists and is not already a trainer
-                $stmt = $this->db->prepare("SELECT user_id FROM users WHERE user_id = :user_id AND user_id NOT IN (SELECT user_id FROM trainers)");
-                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-                $stmt->execute();
-                if (!$stmt->fetch()) {
-                    $this->db->rollBack();
-                    return ['success' => false, 'message' => 'User not found or already a trainer'];
-                }
-                // Update role to 'trainer'
-                $stmt = $this->db->prepare("UPDATE users SET role = 'trainer' WHERE user_id = :user_id");
-                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-                $stmt->execute();
-                $final_user_id = $user_id;
-            } else {
-                // Create new user
-                if (empty($username) || empty($password)) {
-                    $this->db->rollBack();
-                    return ['success' => false, 'message' => 'Username and password are required for new users'];
-                }
-
-                // Check if username exists
-                if ($this->userModel->userExists($username)) {
-                    $this->db->rollBack();
-                    return ['success' => false, 'message' => 'Username already exists'];
-                }
-
-                // Add user
-                $user_result = $this->userModel->register($username, $password, 'trainer', 'active');
-                if (!$user_result) {
-                    $this->db->rollBack();
-                    return ['success' => false, 'message' => 'Failed to create user account'];
-                }
-
-                // Get the new user ID
-                $final_user_id = $this->db->lastInsertId();
-            }
-
-            // Add trainer details
-            $stmt = $this->db->prepare("INSERT INTO trainers (user_id, full_name, email, phone, specialty) VALUES (:user_id, :full_name, :email, :phone, :specialty)");
-            $stmt->bindParam(':user_id', $final_user_id);
-            $stmt->bindParam(':full_name', $full_name);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':phone', $phone);
-            $stmt->bindParam(':specialty', $specialty);
-
-            if ($stmt->execute()) {
-                $this->db->commit();
-                return ['success' => true, 'message' => 'Trainer added successfully'];
-            } else {
-                $this->db->rollBack();
-                return ['success' => false, 'message' => 'Failed to add trainer details'];
-            }
-        } catch (PDOException $e) {
-            $this->db->rollBack();
-            error_log("Add trainer error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Database error'];
-        }
+    public function addTrainer($user_id = null, $username = null, $password = null, $full_name, $email, $phone, $specialty, $image = null) {
+        // Delegate to Trainer model which handles image upload and validation
+        return $this->trainerModel->addTrainer($user_id, $username, $password, $full_name, $specialty, $phone, $email, $image);
     }
 
-    public function updateTrainer($trainer_id, $full_name, $email, $phone, $specialty) {
-        // Validate input
-        if (empty($trainer_id) || empty($full_name)) {
-            return ['success' => false, 'message' => 'Trainer ID and full name are required'];
-        }
-
-        // Validate email format if provided
-        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Invalid email format'];
-        }
-
-        try {
-            // Update trainer
-            $stmt = $this->db->prepare("UPDATE trainers SET full_name = :full_name, email = :email, phone = :phone, specialty = :specialty WHERE trainer_id = :trainer_id");
-            $stmt->bindParam(':full_name', $full_name);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':phone', $phone);
-            $stmt->bindParam(':specialty', $specialty);
-            $stmt->bindParam(':trainer_id', $trainer_id, PDO::PARAM_INT);
-
-            if ($stmt->execute()) {
-                return ['success' => true, 'message' => 'Trainer updated successfully'];
-            }
-
-            return ['success' => false, 'message' => 'Failed to update trainer'];
-        } catch (PDOException $e) {
-            error_log("Update trainer error: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Database error'];
-        }
+    public function updateTrainer($trainer_id, $full_name, $email, $phone, $specialty, $image = null) {
+        // Use Trainer model to handle update and optional image upload
+        return $this->trainerModel->updateTrainer($trainer_id, $full_name, $specialty, $phone, $email, $image);
     }
 
     public function deleteTrainer($trainer_id) {

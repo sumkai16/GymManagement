@@ -45,11 +45,11 @@ $data = $member->getDashboardData($_SESSION['user_id']);
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class='bx bx-bowl-rice'></i>
+                        <i class='bx bx-target-lock'></i>
                     </div>
                     <div class="stat-content">
-                        <h3><?php echo $data['calories_today']; ?></h3>
-                        <p>Calories Today</p>
+                        <h3><?php echo round(($data['nutrition_today']['calories'] / 2500) * 100); ?>%</h3>
+                        <p>Nutrition Goal</p>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -63,11 +63,11 @@ $data = $member->getDashboardData($_SESSION['user_id']);
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class='bx bx-trending-up'></i>
+                        <i class='bx bx-dna'></i>
                     </div>
                     <div class="stat-content">
-                        <h3><?php echo $data['strength_gain']; ?></h3>
-                        <p>Strength Gain</p>
+                        <h3><?php echo $data['nutrition_today']['protein']; ?>g</h3>
+                        <p>Protein Today</p>
                     </div>
                 </div>
             </div>
@@ -129,42 +129,7 @@ $data = $member->getDashboardData($_SESSION['user_id']);
                     </div>
                 </div>
 
-                <!-- Weekly Progress -->
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <h2>Weekly Progress</h2>
-                        <a href="workout.php" class="view-all">View All</a>
-                    </div>
-                    <div class="progress-card">
-                        <div class="progress-item">
-                            <div class="progress-label">
-                                <span>Workouts</span>
-                                <span><?php echo $data['weekly_progress']['workouts']; ?></span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?php echo (explode('/', $data['weekly_progress']['workouts'])[0] / 5) * 100; ?>%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-label">
-                                <span>Cardio</span>
-                                <span><?php echo $data['weekly_progress']['cardio']; ?></span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?php echo (explode('/', $data['weekly_progress']['cardio'])[0] / 3) * 100; ?>%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-item">
-                            <div class="progress-label">
-                                <span>Nutrition Goals</span>
-                                <span><?php echo $data['weekly_progress']['nutrition']; ?></span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?php echo (explode('/', $data['weekly_progress']['nutrition'])[0] / 7) * 100; ?>%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
                 <!-- Recent Activity -->
                 <div class="dashboard-section">
@@ -187,31 +152,7 @@ $data = $member->getDashboardData($_SESSION['user_id']);
                     </div>
                 </div>
 
-                <!-- Upcoming Sessions -->
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <h2>Upcoming Sessions</h2>
-                        <a href="coaches.php" class="view-all">View All</a>
-                    </div>
-                    <div class="sessions-card">
-                        <?php if (empty($data['upcoming_sessions'])): ?>
-                        <p>No upcoming sessions.</p>
-                        <?php else: ?>
-                        <?php foreach ($data['upcoming_sessions'] as $session): ?>
-                        <div class="session-item">
-                            <div class="session-time">
-                                <span class="time"><?php echo htmlspecialchars($session['time']); ?></span>
-                                <span class="date"><?php echo htmlspecialchars($session['date']); ?></span>
-                            </div>
-                            <div class="session-details">
-                                <h4><?php echo htmlspecialchars($session['title']); ?></h4>
-                                <p><?php echo htmlspecialchars($session['coach']); ?></p>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                
 
                 <!-- Quick Actions -->
                 <div class="dashboard-section">

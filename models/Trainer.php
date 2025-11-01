@@ -82,8 +82,8 @@ class Trainer {
             return ['success' => false, 'message' => 'Database error'];
         }
 
-        // Handle image upload
-        $image_path = 'assets/images/trainers/default_trainer.png'; // Default image path
+        // Handle image upload - store only filename in DB
+        $image_filename = 'default_trainer.png';
         if ($image && $image['error'] === UPLOAD_ERR_OK) {
             // Validate image
             $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
@@ -110,7 +110,7 @@ class Trainer {
             $target_path = $upload_dir . $filename;
 
             if (move_uploaded_file($image['tmp_name'], $target_path)) {
-                $image_path = 'assets/images/trainers/' . $filename;
+                $image_filename = $filename;
             } else {
                 return ['success' => false, 'message' => 'Failed to upload image'];
             }
@@ -163,7 +163,7 @@ class Trainer {
             $stmt->bindParam(':specialty', $specialty);
             $stmt->bindParam(':phone', $phone);
             $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':image', $image_path);
+            $stmt->bindParam(':image', $image_filename);
 
             if ($stmt->execute()) {
                 $this->conn->commit();
@@ -191,8 +191,8 @@ class Trainer {
             return ['success' => false, 'message' => 'Invalid email format'];
         }
 
-        // Handle image upload
-        $image_path = 'assets/images/trainers/default_trainer.png'; // Default image path
+        // Handle image upload - only change image if a new one is uploaded
+        $image_filename = null;
         if ($image && $image['error'] === UPLOAD_ERR_OK) {
             // Validate image
             $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
@@ -219,7 +219,7 @@ class Trainer {
             $target_path = $upload_dir . $filename;
 
             if (move_uploaded_file($image['tmp_name'], $target_path)) {
-                $image_path = 'assets/images/trainers/' . $filename;
+                $image_filename = $filename;
             } else {
                 return ['success' => false, 'message' => 'Failed to upload image'];
             }
@@ -237,9 +237,9 @@ class Trainer {
             }
 
             // Update trainer
-            if ($image_path) {
+            if ($image_filename !== null) {
                 $stmt = $this->conn->prepare("UPDATE trainers SET full_name = :full_name, specialty = :specialty, phone = :phone, email = :email, image = :image WHERE trainer_id = :trainer_id");
-                $stmt->bindParam(':image', $image_path);
+                $stmt->bindParam(':image', $image_filename);
             } else {
                 $stmt = $this->conn->prepare("UPDATE trainers SET full_name = :full_name, specialty = :specialty, phone = :phone, email = :email WHERE trainer_id = :trainer_id");
             }

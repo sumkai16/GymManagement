@@ -266,10 +266,18 @@ header.header {
 }
 .contact h2 {
     margin-bottom: 0.7rem;
-    color: #fff;
+    color: #1b1b1b;
 }
-.contact p {
+.contact p {  
     margin-bottom: 1.2rem;
+}
+.contact-title {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  letter-spacing: 1px;
 }
 /* Utility buttons for new style */
 .btn-primary {
@@ -446,17 +454,28 @@ header.header {
   transform: translateY(-4px) scale(1.01);
 }
 .trainer-avatar {
-  width: 74px;
-  height: 74px;
+  width: 110px;
+  height: 110px;
   background: var(--blue-bg);
   border-radius: 50%;
-  margin: 0 auto 12px auto;
+  margin: 0 auto 14px auto;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
   color: var(--blue-main);
   box-shadow: 0 2px 16px rgba(77,208,225,0.06);
+  overflow: hidden;
+  border: 3px solid #e8f6f9;
+}
+
+/* Trainer image fills circular container without overflow */
+.trainer-avatar .trainer-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 .trainer-role {
   display: block;

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../auth/login.php");
+    header("Location: ../../index.php");
     exit;
 }
 
@@ -83,6 +83,7 @@ $username = $_SESSION['username'] ?? 'Admin';
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="../../assets/js/admin_trainers.js"></script>
     <script src="../../assets/js/admin_trainers_validation.js"></script>
+    
 </head>
 <body>
     <!-- Include Alert System -->
@@ -155,13 +156,13 @@ $username = $_SESSION['username'] ?? 'Admin';
                         <?php foreach ($trainers as $trainer): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($trainer['trainer_id']); ?></td>
-                            <td><?php echo htmlspecialchars($trainer['full_name']); ?></td>
+                            <td><span class="truncate-1" title="<?php echo htmlspecialchars($trainer['full_name']); ?>"><?php echo htmlspecialchars($trainer['full_name']); ?></span></td>
                             <td>
                                 <span class="role-badge role-trainer">
-                                    <?php echo htmlspecialchars($trainer['specialty'] ?? 'General'); ?>
+                                    <span class="truncate-1" title="<?php echo htmlspecialchars($trainer['specialty'] ?? 'General'); ?>"><?php echo htmlspecialchars($trainer['specialty'] ?? 'General'); ?></span>
                                 </span>
                             </td>
-                            <td><?php echo htmlspecialchars($trainer['email']); ?></td>
+                            <td><span class="truncate-1" title="<?php echo htmlspecialchars($trainer['email']); ?>"><?php echo htmlspecialchars($trainer['email']); ?></span></td>
                             <td>
                                 <button class="action-btn btn-edit"
                                     onclick="openEditTrainerModal(<?php echo $trainer['trainer_id']; ?>, '<?php echo htmlspecialchars($trainer['full_name']); ?>', '<?php echo htmlspecialchars($trainer['specialty'] ?? ''); ?>', '<?php echo htmlspecialchars($trainer['phone'] ?? ''); ?>', '<?php echo htmlspecialchars($trainer['email']); ?>')"

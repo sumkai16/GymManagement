@@ -127,10 +127,34 @@ return [
         'welcome_text' => 'Welcome,',
         'items' => [
             [
+                'type' => 'section',
+                'label' => 'Overview'
+            ],
+            [
                 'icon' => 'bx-home-alt',
                 'text' => 'Dashboard',
                 'url' => 'member_dashboard.php',
                 'permissions' => ['member']
+            ],
+            [
+                'type' => 'section',
+                'label' => 'People'
+            ],
+            [
+                'icon' => 'bx-group',
+                'text' => 'Coaches',
+                'url' => 'coaches.php',
+                'permissions' => ['member']
+            ],
+            [
+                'icon' => 'bx-user',
+                'text' => 'Profile',
+                'url' => 'profile.php',
+                'permissions' => ['member']
+            ],
+            [
+                'type' => 'section',
+                'label' => 'Operations'
             ],
             [
                 'icon' => 'bx-dumbbell',
@@ -169,15 +193,13 @@ return [
                 ]
             ],
             [
-                'icon' => 'bx-group',
-                'text' => 'Coaches',
-                'url' => 'coaches.php',
-                'permissions' => ['member']
+                'type' => 'section',
+                'label' => 'Insights & Settings'
             ],
             [
-                'icon' => 'bx-user',
-                'text' => 'Profile',
-                'url' => 'profile.php',
+                'icon' => 'bx-cog',
+                'text' => 'Settings',
+                'url' => 'settings.php',
                 'permissions' => ['member']
             ]
         ]

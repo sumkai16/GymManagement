@@ -14,6 +14,20 @@ $data = $workoutController->handleRoutineManagement();
     <link rel="stylesheet" href="../../assets/css/member_styles.css">
     <link rel="stylesheet" href="../../assets/css/workout_routines_styles.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        /* Clamp routine descriptions to avoid overlap */
+        .desc-clamp { 
+            min-width: 250px; 
+            max-width: 520px; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            white-space: normal; 
+            word-break: break-word; 
+        }
+    </style>
 </head>
 <body>
     <!-- Include Dynamic Sidebar -->
@@ -124,7 +138,7 @@ $data = $workoutController->handleRoutineManagement();
                                     </div>
                                     <div class="routine-exercises">
                                         <?php if ($routine['description']): ?>
-                                            <p style="color: #666; font-size: 0.9rem; margin: 0;"><?= htmlspecialchars($routine['description']) ?></p>
+                                            <p class="desc-clamp" style="color: #666; font-size: 0.9rem; margin: 0;"><?= htmlspecialchars($routine['description']) ?></p>
                                         <?php endif; ?>
                                     </div>
                                 </div>

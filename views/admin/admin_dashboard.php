@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../auth/login.php");
+    header("Location: ../../index.php");
     exit;
 }
 
@@ -127,7 +127,7 @@ $stats = $adminController->getDashboardStats();
                                 <span>Add Trainer</span>
                             </a>
                             <a href="attendance.php" class="action-link">
-                                <i class='bxr  bx-calendar-detail'  ></i> 
+                                <i class='bx bx-calendar-check icon'  ></i> 
                                 <span>Attendance</span>
                             </a>
                             <a href="attendance.php" class="action-link">

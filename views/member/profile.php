@@ -5,20 +5,59 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
     exit;
 }
 
-// Sample user data - in a real app, this would come from a database
-$user = [
-    'name' => 'John Doe',
-    'email' => 'john.doe@example.com',
-    'phone' => '+1 (555) 123-4567',
-    'join_date' => '2023-01-15',
-    'membership_type' => 'Premium',
-    'workouts_completed' => 45,
-    'total_hours' => 180,
-    'current_streak' => 7,
-    'goals' => 'Build muscle and improve strength',
-    'fitness_level' => 'Intermediate',
-    'preferred_workout_time' => 'Evening'
-];
+// Instead of static sample data, fetch from DB
+require_once '../../models/Member.php';
+$memberModel = new Member();
+// Get user id from session
+$user_id = $_SESSION['user_id'];
+// Get member's row using user_id
+$user = $memberModel->getMemberByUserId($user_id); // New method we will add
+if (!$user) {
+    die('Member profile not found.');
+}
+
+$updateResult = null; // For modal feedback
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $member_id = $user['member_id'];
+    $newPassword = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+    $notifications = $_POST['notifications'] ?? '';
+    $privacy = $_POST['privacy'] ?? '';
+    $updateOk = true;
+    $passwordChanged = false;
+
+    // Create database connection and pass to User model
+    require_once '../../config/database.php';
+    require_once '../../models/User.php';
+    $database = new Database();
+    $userModel = new User($database->getConnection());
+
+    if ($newPassword !== '' && $newPassword === $confirmPassword) {
+        $passwordChanged = $userModel->updatePasswordByUserId($user_id, $newPassword);
+        if (!$passwordChanged) {
+            $updateOk = false;
+            $updateResult = ['type' => 'error', 'msg' => 'Failed to update password.'];
+        }
+    } elseif ($newPassword !== $confirmPassword) {
+        $updateOk = false;
+        $updateResult = ['type' => 'error', 'msg' => 'Password and Confirm Password do not match.'];
+    }
+    if ($updateOk) {
+        $updateResult = ['type' => 'success', 'msg' => 'Account settings updated successfully!'];
+    }
+}
+
+// Prepare modal data for the modal component
+$modalData = null;
+if ($updateResult) {
+    $modalData = [
+        'id' => 'settings-modal',
+        'type' => $updateResult['type'],
+        'title' => $updateResult['type'] === 'success' ? 'Success!' : 'Error',
+        'message' => $updateResult['msg'],
+        'show' => true
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,24 +86,24 @@ $user = [
                 <div class="profile-sidebar">
                     <div class="profile-header">
                         <div class="profile-avatar">
-                            <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                            <?= strtoupper(substr($user['full_name'], 0, 1)) ?>
                         </div>
-                        <h2 class="profile-name"><?= htmlspecialchars($user['name']) ?></h2>
+                        <h2 class="profile-name"><?= htmlspecialchars($user['full_name']) ?></h2>
                         <p class="profile-role"><?= htmlspecialchars($user['membership_type']) ?> Member</p>
                     </div>
                     
                     <div class="profile-stats">
                         <div class="stat-item">
-                            <h4><?= $user['workouts_completed'] ?></h4>
-                            <p>Workouts Completed</p>
+                            <h4><?= ucfirst($user['membership_type']); ?></h4>
+                            <p>Membership</p>
                         </div>
                         <div class="stat-item">
-                            <h4><?= $user['total_hours'] ?></h4>
-                            <p>Total Hours</p>
+                            <h4><?= ucfirst($user['status']); ?></h4>
+                            <p>Status</p>
                         </div>
                         <div class="stat-item">
-                            <h4><?= $user['current_streak'] ?></h4>
-                            <p>Day Streak</p>
+                            <h4><?= date('F Y', strtotime($user['start_date'])); ?></h4>
+                            <p>Member Since</p>
                         </div>
                     </div>
                     
@@ -88,7 +127,7 @@ $user = [
                         <div class="profile-info">
                             <div class="info-item">
                                 <span class="info-label">Full Name</span>
-                                <span class="info-value"><?= htmlspecialchars($user['name']) ?></span>
+                                <span class="info-value"><?= htmlspecialchars($user['full_name']) ?></span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Email</span>
@@ -100,34 +139,18 @@ $user = [
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Member Since</span>
-                                <span class="info-value"><?= date('F j, Y', strtotime($user['join_date'])) ?></span>
+                                <span class="info-value"><?= date('F j, Y', strtotime($user['start_date'])) ?></span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Fitness Goals -->
-                    <div class="profile-section">
-                        <h3><i class='bx bx-target-lock'></i> Fitness Goals</h3>
-                        <div class="profile-info">
-                            <div class="info-item">
-                                <span class="info-label">Current Goals</span>
-                                <span class="info-value"><?= htmlspecialchars($user['goals']) ?></span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Fitness Level</span>
-                                <span class="info-value"><?= htmlspecialchars($user['fitness_level']) ?></span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Preferred Workout Time</span>
-                                <span class="info-value"><?= htmlspecialchars($user['preferred_workout_time']) ?></span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Removed Fitness Goals section as per redesign -->
 
                     <!-- Account Settings -->
                     <div class="profile-section">
                         <h3><i class='bx bx-cog'></i> Account Settings</h3>
-                        <form class="profile-form">
+                        <form class="profile-form" method="post">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="password">New Password</label>
@@ -182,5 +205,10 @@ $user = [
             </div>
         </div>
     </div>
+
+    <!-- Include Modern Modal Component -->
+    <?php if ($modalData): ?>
+        <?php include '../utilities/modal.php'; ?>
+    <?php endif; ?>
 </body>
 </html>

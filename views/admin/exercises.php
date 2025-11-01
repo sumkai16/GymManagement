@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../auth/login.php");
+    header("Location: ../../index.php");
     exit;
 }
 
@@ -77,6 +77,19 @@ $username = $_SESSION['username'] ?? 'Admin';
     <link rel="stylesheet" href="../../assets/css/modal_styles.css">
     <link rel="stylesheet" href="../../assets/css/admin_users_styles.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        /* Keep description readable without overlapping */
+        .desc-cell {
+            max-width: 190px;
+            overflow: hidden;
+            text-overflow:ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* limit to two lines */
+            -webkit-box-orient: vertical;
+            white-space: normal;
+            word-break: break-word;
+        }
+    </style>
 </head>
 <body>
     <!-- Include Alert System -->
@@ -171,7 +184,7 @@ $username = $_SESSION['username'] ?? 'Admin';
                                 </span>
                             </td>
                             <td><?php echo htmlspecialchars($exercise['equipment'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars(substr($exercise['description'] ?? '', 0, 50)) . (strlen($exercise['description'] ?? '') > 50 ? '...' : ''); ?></td>
+                            <td class="desc-cell"><?php echo htmlspecialchars(substr($exercise['description'] ?? '', 0, 50)) . (strlen($exercise['description'] ?? '') > 50 ? '...' : ''); ?></td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn btn-edit" onclick="openEditExerciseModal(<?php echo $exercise['exercise_id']; ?>, '<?php echo htmlspecialchars($exercise['name']); ?>', '<?php echo htmlspecialchars($exercise['description'] ?? ''); ?>', '<?php echo htmlspecialchars($exercise['muscle_group'] ?? ''); ?>', '<?php echo htmlspecialchars($exercise['equipment'] ?? ''); ?>')" title="Edit Exercise">
