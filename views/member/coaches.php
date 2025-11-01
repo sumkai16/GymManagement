@@ -5,53 +5,47 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
     exit;
 }
 
-// Sample coaches data - in a real app, this would come from a database
-$coaches = [
-    [
-        'id' => 1,
-        'name' => 'Sarah Johnson',
-        'specialty' => 'Strength Training',
-        'experience' => '8 years',
-        'rating' => 4.9,
-        'clients' => 150,
-        'sessions' => 1200,
-        'description' => 'Certified personal trainer specializing in strength training and muscle building. Passionate about helping clients achieve their fitness goals.',
-        'specialties' => ['Strength Training', 'Muscle Building', 'Powerlifting']
-    ],
-    [
-        'id' => 2,
-        'name' => 'Mike Chen',
-        'specialty' => 'Cardio & Weight Loss',
-        'experience' => '6 years',
-        'rating' => 4.8,
-        'clients' => 120,
-        'sessions' => 900,
-        'description' => 'Expert in cardiovascular training and weight loss programs. Focuses on sustainable lifestyle changes.',
-        'specialties' => ['Cardio', 'Weight Loss', 'HIIT', 'Nutrition']
-    ],
-    [
-        'id' => 3,
-        'name' => 'Emma Rodriguez',
-        'specialty' => 'Yoga & Flexibility',
-        'experience' => '10 years',
-        'rating' => 4.9,
-        'clients' => 200,
-        'sessions' => 1500,
-        'description' => 'Certified yoga instructor with expertise in flexibility training and stress management.',
-        'specialties' => ['Yoga', 'Flexibility', 'Meditation', 'Stress Relief']
-    ],
-    [
-        'id' => 4,
-        'name' => 'David Thompson',
-        'specialty' => 'Sports Performance',
-        'experience' => '12 years',
-        'rating' => 4.9,
-        'clients' => 180,
-        'sessions' => 2000,
-        'description' => 'Former professional athlete specializing in sports performance and athletic training.',
-        'specialties' => ['Sports Performance', 'Athletic Training', 'Injury Prevention']
-    ]
-];
+// Fetch trainers from database
+require_once '../../models/Trainer.php';
+$trainerModel = new Trainer();
+
+// Handle search and filter
+$search = $_GET['search'] ?? '';
+$specialtyFilter = $_GET['specialty'] ?? '';
+
+// Get all trainers with optional filters
+$trainers = $trainerModel->getAllTrainers($specialtyFilter ?: null);
+
+// Filter by search term if provided
+if (!empty($search)) {
+    $trainers = array_filter($trainers, function($trainer) use ($search) {
+        return stripos($trainer['full_name'], $search) !== false || 
+               stripos($trainer['specialty'], $search) !== false;
+    });
+}
+
+// Transform trainer data to match the display format
+$coaches = [];
+foreach ($trainers as $trainer) {
+    // Parse specialties from specialty field (if comma-separated) or use as single item
+    $specialties = !empty($trainer['specialty']) ? explode(',', $trainer['specialty']) : ['General Training'];
+    $specialties = array_map('trim', $specialties);
+    
+    $coaches[] = [
+        'id' => $trainer['trainer_id'],
+        'name' => $trainer['full_name'],
+        'specialty' => $trainer['specialty'] ?? 'General Training',
+        'experience' => $trainer['experience'] ?? 'N/A', // Missing field
+        'rating' => $trainer['rating'] ?? '4.5', // Missing field
+        'clients' => $trainer['total_clients'] ?? '0', // Missing field
+        'sessions' => $trainer['total_sessions'] ?? '0', // Missing field
+        'description' => $trainer['description'] ?? 'Certified fitness professional dedicated to helping you achieve your fitness goals.', // Missing field
+        'specialties' => $specialties,
+        'email' => $trainer['email'] ?? '',
+        'phone' => $trainer['phone'] ?? '',
+        'image' => $trainer['image'] ?? 'default_trainer.png'
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -77,19 +71,24 @@ $coaches = [
 
             <!-- Search and Filter Section -->
             <div class="search-section">
-                <form class="search-form">
+                <form class="search-form" method="get">
                     <div class="form-group">
                         <label for="search">Search Coaches</label>
-                        <input type="text" id="search" name="search" placeholder="Search by name or specialty...">
+                        <input type="text" id="search" name="search" placeholder="Search by name or specialty..." value="<?= htmlspecialchars($search) ?>">
                     </div>
                     <div class="form-group">
                         <label for="specialty">Specialty</label>
                         <select id="specialty" name="specialty">
                             <option value="">All Specialties</option>
-                            <option value="strength">Strength Training</option>
-                            <option value="cardio">Cardio & Weight Loss</option>
-                            <option value="yoga">Yoga & Flexibility</option>
-                            <option value="sports">Sports Performance</option>
+                            <?php
+                            // Get unique specialties from trainers
+                            $allTrainers = $trainerModel->getAllTrainers();
+                            $specialties = array_unique(array_filter(array_column($allTrainers, 'specialty')));
+                            foreach ($specialties as $spec): ?>
+                                <option value="<?= htmlspecialchars($spec) ?>" <?= $specialtyFilter === $spec ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($spec) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
@@ -97,17 +96,55 @@ $coaches = [
                             <i class='bx bx-search'></i>
                             Search
                         </button>
+                        <?php if (!empty($search) || !empty($specialtyFilter)): ?>
+                            <a href="coaches.php" class="btn btn-secondary" style="margin-left: 10px;">
+                                <i class='bx bx-x'></i>
+                                Clear
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </form>
             </div>
 
             <!-- Coaches Grid -->
+            <?php if (empty($coaches)): ?>
+                <div class="no-data">
+                    <i class='bx bx-user-x'></i>
+                    <p>No coaches found</p>
+                    <p style="font-size: 0.9rem; font-weight: normal; margin-top: 0.5rem;">
+                        <?php if (!empty($search) || !empty($specialtyFilter)): ?>
+                            Try adjusting your search or filter criteria.
+                        <?php else: ?>
+                            There are currently no coaches available.
+                        <?php endif; ?>
+                    </p>
+                </div>
+            <?php else: ?>
             <div class="coaches-grid">
                 <?php foreach ($coaches as $coach): ?>
                 <div class="coach-card">
                     <div class="coach-header">
                         <div class="coach-avatar">
-                            <?= strtoupper(substr($coach['name'], 0, 1)) ?>
+                            <?php
+                            $imagePath = '';
+                            if (!empty($coach['image']) && trim($coach['image']) !== '' && $coach['image'] !== 'default_trainer.png') {
+                                $img = trim($coach['image']);
+                                // Check if it's already a full path or just filename
+                                $isAbsolute = stripos($img, 'http://') === 0 || stripos($img, 'https://') === 0 || substr($img, 0, 1) === '/';
+                                $alreadyPrefixed = strpos($img, 'assets/images/trainers/') === 0;
+                                $imagePath = $isAbsolute || $alreadyPrefixed ? $img : ('../../assets/images/trainers/' . $img);
+                                
+                                // Check if file actually exists
+                                $fullPath = __DIR__ . '/../../assets/images/trainers/' . basename($img);
+                                if (file_exists($fullPath)) {
+                                    echo '<img src="' . htmlspecialchars($imagePath) . '" alt="' . htmlspecialchars($coach['name']) . '" />';
+                                } else {
+                                    echo strtoupper(substr($coach['name'], 0, 1));
+                                }
+                            } else {
+                                echo strtoupper(substr($coach['name'], 0, 1));
+                            }
+                            ?>
                         </div>
                         <div class="coach-info">
                             <h3><?= htmlspecialchars($coach['name']) ?></h3>
@@ -153,6 +190,7 @@ $coaches = [
                 </div>
                 <?php endforeach; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </body>
