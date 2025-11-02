@@ -7,7 +7,49 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
 
 // Fetch trainers from database
 require_once '../../models/Trainer.php';
+require_once '../../models/Member.php';
+require_once '../../models/Booking.php';
+require_once '../../controllers/BookingController.php';
+
 $trainerModel = new Trainer();
+$memberModel = new Member();
+$bookingModel = new Booking();
+$bookingController = new BookingController();
+
+// Handle booking form submission
+$bookingMessage = null;
+$bookingMessageType = null;
+$bookingTrainerId = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_trainer'])) {
+    $trainer_id = $_POST['trainer_id'] ?? null;
+    $booking_date = $_POST['booking_date'] ?? '';
+    $booking_time = $_POST['booking_time'] ?? '';
+    $bookingTrainerId = $trainer_id;
+    
+    if (!$trainer_id || empty($booking_date) || empty($booking_time)) {
+        $bookingMessage = 'Please fill in all fields.';
+        $bookingMessageType = 'error';
+    } else {
+        // Get member details
+        $user_id = $_SESSION['user_id'];
+        $member = $memberModel->getMemberByUserId($user_id);
+        
+        if ($member) {
+            $result = $bookingController->createBooking($user_id, $trainer_id, $booking_date, $booking_time);
+            $bookingMessage = $result['message'];
+            $bookingMessageType = $result['success'] ? 'success' : 'error';
+            
+            if ($result['success']) {
+                // Redirect to profile page to show the booking
+                header("Location: profile.php?booking_success=1");
+                exit;
+            }
+        } else {
+            $bookingMessage = 'Member profile not found.';
+            $bookingMessageType = 'error';
+        }
+    }
+}
 
 // Handle search and filter
 $search = $_GET['search'] ?? '';
@@ -55,6 +97,7 @@ foreach ($trainers as $trainer) {
     <title>Coaches - FitNexus</title>
     <link rel="stylesheet" href="../../assets/css/member_styles.css">
     <link rel="stylesheet" href="../../assets/css/coaches_styles.css">
+    <link rel="stylesheet" href="../../assets/css/booking_modal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
@@ -178,7 +221,12 @@ foreach ($trainers as $trainer) {
                     </div>
                     
                     <div class="coach-actions">
-                        <button class="btn btn-primary">
+                        <button type="button" onclick="showBookingModal(
+                            <?= htmlspecialchars($coach['id']) ?>,
+                            '<?= htmlspecialchars($coach['name'], ENT_QUOTES) ?>',
+                            '<?= htmlspecialchars($coach['specialty'] ?? 'Fitness Trainer', ENT_QUOTES) ?>',
+                            window.coachAvatars['<?= (int)$coach['id'] ?>']
+                        )" class="btn btn-primary">
                             <i class='bx bx-calendar'></i>
                             Book Session
                         </button>
@@ -193,5 +241,41 @@ foreach ($trainers as $trainer) {
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Booking Modal Container -->
+    <div id="booking-modal-container"></div>
+
+    <?php
+    // Prepare coach avatars for modal in JS:
+    $coachAvatars = [];
+    foreach ($coaches as $coach) {
+        ob_start();
+        $imagePath = '';
+        if (!empty($coach['image']) && trim($coach['image']) !== '' && $coach['image'] !== 'default_trainer.png') {
+            $img = trim($coach['image']);
+            $isAbsolute = stripos($img, 'http://') === 0 || stripos($img, 'https://') === 0 || substr($img, 0, 1) === '/';
+            $alreadyPrefixed = strpos($img, 'assets/images/trainers/') === 0;
+            $imagePath = $isAbsolute || $alreadyPrefixed ? $img : ('../../assets/images/trainers/' . $img);
+            $fileOk = $isAbsolute;
+            if (!$isAbsolute) {
+                $fullPath = __DIR__ . '/../../assets/images/trainers/' . basename($img);
+                $fileOk = file_exists($fullPath);
+            }
+            if ($fileOk) {
+                echo '<img src="' . htmlspecialchars($imagePath) . '" alt="' . htmlspecialchars($coach['name']) . '" />';
+            } else {
+                echo strtoupper(substr($coach['name'], 0, 1));
+            }
+        } else {
+            echo strtoupper(substr($coach['name'], 0, 1));
+        }
+        $coachAvatars[$coach['id']] = ob_get_clean();
+    }
+    ?>
+    <script>
+    window.coachAvatars = <?php echo json_encode($coachAvatars); ?>;
+    </script>
+
+    <script src="../../assets/js/booking_modal.js"></script>
 </body>
 </html>

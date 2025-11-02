@@ -301,10 +301,9 @@ body {
     color: white;
     box-shadow: 0 4px 15px rgba(26, 155, 168, 0.20);
 }
-
 .btn-primary:hover {
     transform: translateY(-2px);
-    background:linear-gradient(135deg, #4dd0e1 0%, #1a9ba8 90%);
+    background: linear-gradient(135deg, #4dd0e1 0%, #1a9ba8 90%);
     box-shadow: 0 8px 25px rgba(77, 208, 225, 0.25);
 }
 
