@@ -276,6 +276,25 @@ foreach ($trainers as $trainer) {
     window.coachAvatars = <?php echo json_encode($coachAvatars); ?>;
     </script>
 
+    <?php if ($bookingMessageType === 'error' && $bookingTrainerId):
+        $coachForError = null;
+        foreach ($coaches as $c) {
+            if ((int)$c['id'] === (int)$bookingTrainerId) { $coachForError = $c; break; }
+        }
+        $errTrainerName = $coachForError ? $coachForError['name'] : 'Selected Trainer';
+        $errTrainerSpec = $coachForError ? ($coachForError['specialty'] ?? 'Fitness Trainer') : 'Fitness Trainer';
+    ?>
+    <script>
+    window.bookingModalAutoOpenData = {
+        trainerId: <?= (int)$bookingTrainerId ?>,
+        trainerName: <?= json_encode($errTrainerName) ?>,
+        trainerSpecialty: <?= json_encode($errTrainerSpec) ?>,
+        avatarHTML: window.coachAvatars['<?= (int)$bookingTrainerId ?>'],
+        errorMessage: <?= json_encode($bookingMessage) ?>
+    };
+    </script>
+    <?php endif; ?>
+
     <script src="../../assets/js/booking_modal.js"></script>
 </body>
 </html>

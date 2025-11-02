@@ -14,11 +14,40 @@ class Booking {
      */
     public function createBooking($member_id, $trainer_id, $booking_date, $booking_time) {
         try {
-            // Validate date is not in the past
-            $today = date('Y-m-d');
-            if ($booking_date < $today) {
+            // Normalize and validate date (Y-m-d)
+            $dateObj = DateTime::createFromFormat('Y-m-d', $booking_date);
+            $dateValid = $dateObj && $dateObj->format('Y-m-d') === $booking_date;
+            if (!$dateValid) {
+                return ['success' => false, 'message' => 'Invalid date format.'];
+            }
+
+            // Normalize and validate time (H:i or H:i:s), store as H:i:s
+            $timeStr = $booking_time;
+            $timeObj = DateTime::createFromFormat('H:i:s', $timeStr);
+            if (!$timeObj) {
+                $timeObj = DateTime::createFromFormat('H:i', $timeStr);
+                if ($timeObj) {
+                    $timeStr = $timeObj->format('H:i:s');
+                }
+            }
+            if (!$timeObj) {
+                return ['success' => false, 'message' => 'Invalid time format.'];
+            }
+
+            // Ensure combined datetime is in the future
+            $combinedStr = $dateObj->format('Y-m-d') . ' ' . $timeStr;
+            $combinedObj = DateTime::createFromFormat('Y-m-d H:i:s', $combinedStr);
+            if (!$combinedObj) {
+                return ['success' => false, 'message' => 'Invalid date/time selection.'];
+            }
+            $now = new DateTime();
+            if ($combinedObj <= $now) {
                 return ['success' => false, 'message' => 'Cannot book sessions in the past.'];
             }
+
+            // Reassign normalized values
+            $booking_date = $dateObj->format('Y-m-d');
+            $booking_time = $timeStr; // normalized H:i:s
 
             // Check if trainer is already booked at this time
             if ($this->isTrainerBooked($trainer_id, $booking_date, $booking_time)) {
