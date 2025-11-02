@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 01, 2025 at 12:59 PM
+-- Generation Time: Nov 02, 2025 at 06:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -319,6 +319,30 @@ INSERT INTO `trainers` (`trainer_id`, `user_id`, `full_name`, `specialty`, `expe
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `trainer_bookings`
+--
+
+CREATE TABLE `trainer_bookings` (
+  `booking_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `trainer_id` int(11) NOT NULL,
+  `booking_date` date NOT NULL,
+  `booking_time` time NOT NULL,
+  `status` enum('pending','confirmed','cancelled') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `trainer_bookings`
+--
+
+INSERT INTO `trainer_bookings` (`booking_id`, `member_id`, `trainer_id`, `booking_date`, `booking_time`, `status`, `created_at`, `updated_at`) VALUES
+(1, 4, 8, '2025-11-04', '22:00:00', 'cancelled', '2025-11-02 04:06:38', '2025-11-02 04:12:56');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -449,6 +473,14 @@ ALTER TABLE `trainers`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `trainer_bookings`
+--
+ALTER TABLE `trainer_bookings`
+  ADD PRIMARY KEY (`booking_id`),
+  ADD KEY `member_id` (`member_id`),
+  ADD KEY `trainer_id` (`trainer_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -527,6 +559,12 @@ ALTER TABLE `trainers`
   MODIFY `trainer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT for table `trainer_bookings`
+--
+ALTER TABLE `trainer_bookings`
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -589,6 +627,13 @@ ALTER TABLE `supplement_logs`
 --
 ALTER TABLE `trainers`
   ADD CONSTRAINT `trainers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `trainer_bookings`
+--
+ALTER TABLE `trainer_bookings`
+  ADD CONSTRAINT `trainer_bookings_ibfk_1` FOREIGN KEY (`member_id`) REFERENCES `members` (`member_id`),
+  ADD CONSTRAINT `trainer_bookings_ibfk_2` FOREIGN KEY (`trainer_id`) REFERENCES `trainers` (`trainer_id`);
 
 --
 -- Constraints for table `workouts`
