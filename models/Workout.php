@@ -34,8 +34,8 @@ class Workout {
     // Create new workout
     public function createWorkout($user_id, $routine_id, $name, $notes = '') {
         $stmt = $this->conn->prepare("
-            INSERT INTO workouts (routine_id, workout_name) 
-            VALUES (:routine_id, :name)
+            INSERT INTO workouts (routine_id, workout_name, created_at) 
+            VALUES (:routine_id, :name, NOW())
         ");
         $stmt->bindParam(':routine_id', $routine_id, PDO::PARAM_INT);
         $stmt->bindParam(':name', $name);

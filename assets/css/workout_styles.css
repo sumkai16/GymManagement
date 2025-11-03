@@ -11,6 +11,10 @@ body {
     min-height: 100vh;
 }
 
+/* Ensure actions are on one line and same height */
+.card-actions{display:flex;gap:.5rem;justify-content:flex-end;align-items:center;margin-top:.25rem;flex-wrap:nowrap}
+.card-actions .btn{margin:0;display:inline-flex;align-items:center;justify-content:center;height:42px;padding:.5rem 1rem;white-space:nowrap}
+
 /* Add gym equipment icons as decorative elements */
 .workout-section::after {
     content: '🏋️';
@@ -24,10 +28,9 @@ body {
 
 /* Workout Container */
 .workout-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
 }
 
 .workout-section {
@@ -160,8 +163,6 @@ body {
 }
 
 .workout-item {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 1.25rem;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);

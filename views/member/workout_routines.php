@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
+    header("Location: ../auth/login.php");
+    exit;
+}
 require_once '../../controllers/WorkoutController.php';
 
 $workoutController = new WorkoutController();
@@ -75,32 +79,7 @@ $data = $workoutController->handleRoutineManagement();
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="routine-exercises">
-                                        <?php 
-                                        $routineExercises = $workoutController->routineModel->getExercisesForRoutine($routine['id']);
-                                        if (!empty($routineExercises)): 
-                                        ?>
-                                            <?php foreach (array_slice($routineExercises, 0, 3) as $exercise): ?>
-                                                <div class="exercise-item">
-                                                    <div class="exercise-info">
-                                                        <h5><?= htmlspecialchars($exercise['exercise_name']) ?></h5>
-                                                        <p><?= $exercise['sets'] ?> sets × <?= $exercise['reps'] ?> reps
-                                                        <?php if ($exercise['weight']): ?>
-                                                            @ <?= $exercise['weight'] ?>kg
-                                                        <?php endif; ?>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            <?php endforeach; ?>
-                                            <?php if (count($routineExercises) > 3): ?>
-                                                <p style="text-align: center; color: #666; font-size: 0.8rem; margin: 0.5rem 0 0 0;">
-                                                    +<?= count($routineExercises) - 3 ?> more exercises
-                                                </p>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <p style="color: #666; font-size: 0.9rem; text-align: center; margin: 0;">No exercises added yet</p>
-                                        <?php endif; ?>
-                                    </div>
+                                    
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -112,45 +91,7 @@ $data = $workoutController->handleRoutineManagement();
                     </div>
                 </div>
                 
-                <!-- Public Routines -->
-                <div class="routines-section">
-                    <h3><i class='bx bx-globe'></i> Public Routines</h3>
-                    <div class="routine-list">
-                        <?php if (!empty($data['public_routines'])): ?>
-                            <?php foreach ($data['public_routines'] as $routine): ?>
-                                <div class="routine-item">
-                                    <div class="routine-header">
-                                        <div class="routine-info">
-                                            <h4><?= htmlspecialchars($routine['name']) ?></h4>
-                                            <p>
-                                                by <?= htmlspecialchars($routine['first_name'] . ' ' . $routine['last_name']) ?>
-                                                • <?= date('M j, Y', strtotime($routine['created_at'])) ?>
-                                            </p>
-                                        </div>
-                                        <div class="routine-actions">
-                                            <button class="btn btn-sm btn-primary" onclick="viewRoutine(<?= $routine['id'] ?>)">
-                                                <i class='bx bx-show'></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-success" onclick="copyRoutine(<?= $routine['id'] ?>)">
-                                                <i class='bx bx-copy'></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="routine-exercises">
-                                        <?php if ($routine['description']): ?>
-                                            <p class="desc-clamp" style="color: #666; font-size: 0.9rem; margin: 0;"><?= htmlspecialchars($routine['description']) ?></p>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="no-data">
-                                <i class='bx bx-globe'></i>
-                                <p>No public routines available</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -170,124 +111,6 @@ $data = $workoutController->handleRoutineManagement();
                     <div class="form-group">
                         <label for="routine_name">Routine Name</label>
                         <input type="text" id="routine_name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="routine_public" name="is_public" value="1">
-                            <label for="routine_public">Make public</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="routine_description">Description</label>
-                    <textarea id="routine_description" name="description" placeholder="Describe this routine..."></textarea>
-                </div>
-
-                <!-- Quick Exercise Selection -->
-                <div class="exercise-selection">
-                    <h4><i class='bx bx-dumbbell'></i> Add Exercises</h4>
-                    
-                    <!-- Muscle Group Filter -->
-                    <div class="form-group">
-                        <label for="muscle_filter">Filter by Muscle Group:</label>
-                        <select id="muscle_filter" onchange="filterExercises()">
-                            <option value="">All</option>
-                            <option value="chest">Chest</option>
-                            <option value="back">Back</option>
-                            <option value="shoulders">Shoulders</option>
-                            <option value="arms">Arms</option>
-                            <option value="legs">Legs</option>
-                            <option value="core">Core</option>
-                        </select>
-                    </div>
-
-                    <!-- Exercise Grid -->
-                    <div class="exercise-grid">
-                        <!-- Chest -->
-                        <div class="muscle-group" data-muscle="chest">
-                            <h5>Chest</h5>
-                            <div class="exercise-options">
-                                <label><input type="checkbox" name="exercises[]" value="bench_press"> Bench Press</label>
-                                <label><input type="checkbox" name="exercises[]" value="push_ups"> Push-ups</label>
-                                <label><input type="checkbox" name="exercises[]" value="incline_bench"> Incline Bench</label>
-                                <label><input type="checkbox" name="exercises[]" value="dips"> Dips</label>
-                            </div>
-                        </div>
-
-                        <!-- Back -->
-                        <div class="muscle-group" data-muscle="back">
-                            <h5>Back</h5>
-                            <div class="exercise-options">
-                                <label><input type="checkbox" name="exercises[]" value="pull_ups"> Pull-ups</label>
-                                <label><input type="checkbox" name="exercises[]" value="deadlift"> Deadlift</label>
-                                <label><input type="checkbox" name="exercises[]" value="bent_row"> Bent Row</label>
-                                <label><input type="checkbox" name="exercises[]" value="lat_pulldown"> Lat Pulldown</label>
-                            </div>
-                        </div>
-
-                        <!-- Shoulders -->
-                        <div class="muscle-group" data-muscle="shoulders">
-                            <h5>Shoulders</h5>
-                            <div class="exercise-options">
-                                <label><input type="checkbox" name="exercises[]" value="overhead_press"> Overhead Press</label>
-                                <label><input type="checkbox" name="exercises[]" value="lateral_raises"> Lateral Raises</label>
-                                <label><input type="checkbox" name="exercises[]" value="front_raises"> Front Raises</label>
-                                <label><input type="checkbox" name="exercises[]" value="rear_fly"> Rear Fly</label>
-                            </div>
-                        </div>
-
-                        <!-- Arms -->
-                        <div class="muscle-group" data-muscle="arms">
-                            <h5>Arms</h5>
-                            <div class="exercise-options">
-                                <label><input type="checkbox" name="exercises[]" value="bicep_curls"> Bicep Curls</label>
-                                <label><input type="checkbox" name="exercises[]" value="tricep_dips"> Tricep Dips</label>
-                                <label><input type="checkbox" name="exercises[]" value="hammer_curls"> Hammer Curls</label>
-                                <label><input type="checkbox" name="exercises[]" value="tricep_extensions"> Tricep Extensions</label>
-                            </div>
-                        </div>
-
-                        <!-- Legs -->
-                        <div class="muscle-group" data-muscle="legs">
-                            <h5>Legs</h5>
-                            <div class="exercise-options">
-                                <label><input type="checkbox" name="exercises[]" value="squats"> Squats</label>
-                                <label><input type="checkbox" name="exercises[]" value="lunges"> Lunges</label>
-                                <label><input type="checkbox" name="exercises[]" value="leg_press"> Leg Press</label>
-                                <label><input type="checkbox" name="exercises[]" value="calf_raises"> Calf Raises</label>
-                            </div>
-                        </div>
-
-                        <!-- Core -->
-                        <div class="muscle-group" data-muscle="core">
-                            <h5>Core</h5>
-                            <div class="exercise-options">
-                                <label><input type="checkbox" name="exercises[]" value="plank"> Plank</label>
-                                <label><input type="checkbox" name="exercises[]" value="crunches"> Crunches</label>
-                                <label><input type="checkbox" name="exercises[]" value="russian_twists"> Russian Twists</label>
-                                <label><input type="checkbox" name="exercises[]" value="leg_raises"> Leg Raises</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sets & Reps Template -->
-                    <div class="sets-reps-template" style="display: none;">
-                        <h4>Exercise Details</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Sets</label>
-                                <input type="number" name="sets[]" value="3" min="1" max="10">
-                            </div>
-                            <div class="form-group">
-                                <label>Reps</label>
-                                <input type="number" name="reps[]" value="10" min="1" max="50">
-                            </div>
-                            <div class="form-group">
-                                <label>Weight (kg)</label>
-                                <input type="number" name="weight[]" value="0" min="0" step="0.5">
-                            </div>
-                        </div>
                     </div>
                 </div>
                 
@@ -316,13 +139,16 @@ $data = $workoutController->handleRoutineManagement();
                             <h4><?= htmlspecialchars($category) ?></h4>
                             <?php 
                             $categoryExercises = array_filter($data['exercises'], function($exercise) use ($category) {
-                                return $exercise['category'] === $category;
+                                return strcasecmp($exercise['muscle_group'], $category) === 0;
                             });
                             ?>
                             <?php foreach ($categoryExercises as $exercise): ?>
                                 <div class="exercise-option">
-                                    <input type="checkbox" name="selected_exercises[]" value="<?= $exercise['id'] ?>" id="exercise_<?= $exercise['id'] ?>">
-                                    <label for="exercise_<?= $exercise['id'] ?>"><?= htmlspecialchars($exercise['name']) ?></label>
+                                    <input type="checkbox" name="selected_exercises[]" value="<?= $exercise['exercise_id'] ?>" id="exercise_<?= $exercise['exercise_id'] ?>">
+                                    <label for="exercise_<?= $exercise['exercise_id'] ?>">
+                                        <?= htmlspecialchars($exercise['name']) ?>
+                                        <span style="font-size: 0.85rem; color: #666;"> - <?= htmlspecialchars($exercise['equipment']) ?></span>
+                                    </label>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -374,7 +200,7 @@ $data = $workoutController->handleRoutineManagement();
                 formData.append('action', 'delete_routine');
                 formData.append('routine_id', routineId);
                 
-                fetch('../../controllers/WorkoutController.php', {
+                fetch('workout_routines.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -389,7 +215,7 @@ $data = $workoutController->handleRoutineManagement();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred');
+                    alert('An error occurred. Check console for details.');
                 });
             }
         }
@@ -400,7 +226,7 @@ $data = $workoutController->handleRoutineManagement();
                 formData.append('action', 'copy_routine');
                 formData.append('routine_id', routineId);
                 
-                fetch('../../controllers/WorkoutController.php', {
+                fetch('workout_routines.php', {
                     method: 'POST',
                     body: formData
                 })
@@ -415,7 +241,7 @@ $data = $workoutController->handleRoutineManagement();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred');
+                    alert('An error occurred. Check console for details.');
                 });
             }
         }
@@ -440,22 +266,26 @@ $data = $workoutController->handleRoutineManagement();
             
             const formData = new FormData(this);
             
-            fetch('../../controllers/WorkoutController.php', {
+            fetch('workout_routines.php', {
                 method: 'POST',
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    location.reload();
+                    // Redirect to detail view to add exercises
+                    if (data.routine_id) {
+                        window.location.href = `workout_routine_detail.php?id=${data.routine_id}`;
+                    } else {
+                        location.reload();
+                    }
                 } else {
-                    alert(data.message);
+                    alert(data.message || 'Failed to create routine');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred');
+                console.error('Fetch error:', error);
+                alert('Network error: ' + error.message);
             });
         });
         

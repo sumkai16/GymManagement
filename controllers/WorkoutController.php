@@ -7,7 +7,7 @@ require_once __DIR__ . '/../config/database.php';
 class WorkoutController {
     private $workoutModel;
     private $exerciseModel;
-    private $routineModel;
+    public $routineModel;  // Made public for view access
     private $db;
     
     public function __construct() {
@@ -38,6 +38,41 @@ class WorkoutController {
                     return $this->updateExerciseInWorkout($user_id);
                 case 'remove_exercise':
                     return $this->removeExerciseFromWorkout($user_id);
+                case 'set_exercise_done':
+                    $we_id = (int)($_POST['workout_exercise_id'] ?? 0);
+                    $done = (int)($_POST['is_done'] ?? 0);
+                    if ($we_id <= 0) {
+                        return ['success' => false, 'message' => 'Invalid exercise'];
+                    }
+                    $ok = $this->exerciseModel->setExerciseDone($we_id, $done);
+                    return $ok ? ['success' => true] : ['success' => false, 'message' => 'Failed to update status'];
+                // Per-set tracking actions
+                case 'add_set':
+                    $we_id = (int)($_POST['workout_exercise_id'] ?? 0);
+                    $set_number = (int)($_POST['set_number'] ?? 1);
+                    $reps = $_POST['reps'] ?? null;
+                    $weight = $_POST['weight'] ?? null;
+                    if ($we_id <= 0) return ['success' => false, 'message' => 'Invalid exercise'];
+                    $id = $this->exerciseModel->addSetToExercise($we_id, $set_number, $reps, $weight);
+                    return $id ? ['success' => true, 'wes_id' => $id] : ['success' => false, 'message' => 'Failed to add set'];
+                case 'update_set':
+                    $wes_id = (int)($_POST['wes_id'] ?? 0);
+                    $reps = $_POST['reps'] ?? null;
+                    $weight = $_POST['weight'] ?? null;
+                    if ($wes_id <= 0) return ['success' => false, 'message' => 'Invalid set'];
+                    $ok = $this->exerciseModel->updateSet($wes_id, $reps, $weight);
+                    return $ok ? ['success' => true] : ['success' => false, 'message' => 'Failed to update set'];
+                case 'remove_set':
+                    $wes_id = (int)($_POST['wes_id'] ?? 0);
+                    if ($wes_id <= 0) return ['success' => false, 'message' => 'Invalid set'];
+                    $ok = $this->exerciseModel->removeSet($wes_id);
+                    return $ok ? ['success' => true] : ['success' => false, 'message' => 'Failed to remove set'];
+                case 'set_set_done':
+                    $wes_id = (int)($_POST['wes_id'] ?? 0);
+                    $done = (int)($_POST['is_done'] ?? 0);
+                    if ($wes_id <= 0) return ['success' => false, 'message' => 'Invalid set'];
+                    $ok = $this->exerciseModel->setSetDone($wes_id, $done);
+                    return $ok ? ['success' => true] : ['success' => false, 'message' => 'Failed to update set'];
                 case 'delete_workout':
                     return $this->deleteWorkout($user_id);
             }
@@ -58,19 +93,40 @@ class WorkoutController {
             
             switch ($action) {
                 case 'create_routine':
-                    return $this->createRoutine($user_id);
+                    $response = $this->createRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
                 case 'update_routine':
-                    return $this->updateRoutine($user_id);
+                    $response = $this->updateRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
                 case 'delete_routine':
-                    return $this->deleteRoutine($user_id);
+                    $response = $this->deleteRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
                 case 'add_exercise_to_routine':
-                    return $this->addExerciseToRoutine($user_id);
+                    $response = $this->addExerciseToRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
                 case 'update_exercise_in_routine':
-                    return $this->updateExerciseInRoutine($user_id);
+                    $response = $this->updateExerciseInRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
                 case 'remove_exercise_from_routine':
-                    return $this->removeExerciseFromRoutine($user_id);
+                    $response = $this->removeExerciseFromRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
                 case 'copy_routine':
-                    return $this->copyRoutine($user_id);
+                    $response = $this->copyRoutine($user_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
             }
         }
         
@@ -80,8 +136,15 @@ class WorkoutController {
     // Start new workout
     private function startWorkout($user_id) {
         $routine_id = $_POST['routine_id'] ?? null;
-        $name = $_POST['name'] ?? 'Workout ' . date('Y-m-d H:i');
+        // Use date-only for default name (no time)
+        $name = $_POST['name'] ?? ('Workout ' . date('Y-m-d'));
         $notes = $_POST['notes'] ?? '';
+        
+        // Prevent starting if there is an in-progress workout (no end_time)
+        $check = $this->db->query("SELECT workout_id FROM workouts WHERE end_time IS NULL LIMIT 1");
+        if ($check && $check->fetch(PDO::FETCH_ASSOC)) {
+            return ['success' => false, 'message' => 'You already have an in-progress workout. Please end it before starting a new one.'];
+        }
         
         $workout_id = $this->workoutModel->createWorkout($user_id, $routine_id, $name, $notes);
         
@@ -94,19 +157,75 @@ class WorkoutController {
     
     // End workout
     private function endWorkout($user_id) {
-        $workout_id = $_POST['workout_id'] ?? 0;
-        $end_time = $_POST['end_time'] ?? date('Y-m-d H:i:s');
-        
-        $stmt = $this->db->prepare("UPDATE workouts SET end_time = :end_time WHERE id = :workout_id AND user_id = :user_id");
-        $stmt->bindParam(':end_time', $end_time);
-        $stmt->bindParam(':workout_id', $workout_id, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        
-        if ($stmt->execute()) {
-            return ['success' => true, 'message' => 'Workout completed successfully'];
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-        
-        return ['success' => false, 'message' => 'Failed to end workout'];
+        try {
+            $workout_id = (int)($_POST['workout_id'] ?? 0);
+            if ($workout_id <= 0) {
+                return ['success' => false, 'message' => 'Invalid workout'];
+            }
+            // Mark workout end time using DB server time to ensure consistency with created_at (current_timestamp)
+            $stmt = $this->db->prepare("UPDATE workouts SET end_time = NOW() WHERE workout_id = :workout_id");
+            $stmt->bindParam(':workout_id', $workout_id, PDO::PARAM_INT);
+            if (!$stmt->execute()) {
+                return ['success' => false, 'message' => 'Failed to end workout'];
+            }
+            
+            // Compute duration in minutes (created_at to end_time)
+            $createdAt = null;
+            $wq = $this->db->prepare("SELECT created_at FROM workouts WHERE workout_id = :wid");
+            $wq->bindParam(':wid', $workout_id, PDO::PARAM_INT);
+            if ($wq->execute()) {
+                $row = $wq->fetch(PDO::FETCH_ASSOC);
+                if ($row && !empty($row['created_at'])) {
+                    $createdAt = $row['created_at'];
+                }
+            }
+            $durationMinutes = 0;
+            if ($createdAt) {
+                // Re-fetch the stored end_time (set by DB NOW()) to be precise
+                $eq = $this->db->prepare("SELECT end_time FROM workouts WHERE workout_id = :wid");
+                $eq->bindParam(':wid', $workout_id, PDO::PARAM_INT);
+                $endTimeVal = null;
+                if ($eq->execute()) {
+                    $erow = $eq->fetch(PDO::FETCH_ASSOC);
+                    if ($erow && !empty($erow['end_time'])) { $endTimeVal = $erow['end_time']; }
+                }
+                $endTs = $endTimeVal ? strtotime($endTimeVal) : time();
+                $durationMinutes = (int)ceil(($endTs - strtotime($createdAt)) / 60);
+                if ($durationMinutes < 0) { $durationMinutes = 0; }
+            }
+
+            // Insert logs per set if available; fallback to per exercise
+            $member_id = isset($_SESSION['member_id']) ? (int)$_SESSION['member_id'] : (int)($_SESSION['user_id'] ?? 0);
+            // Try per-set
+            $perSet = $this->db->prepare("INSERT INTO workout_logs (member_id, workout_id, exercise_id, sets, reps, weight, duration, log_date)
+                SELECT :member_id, we.workout_id, we.exercise_id, 1, wes.reps, wes.weight, :duration, CURDATE()
+                FROM workout_exercises we
+                JOIN workout_exercise_sets wes ON wes.we_id = we.we_id
+                WHERE we.workout_id = :workout_id");
+            $perSet->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+            $perSet->bindParam(':workout_id', $workout_id, PDO::PARAM_INT);
+            $perSet->bindParam(':duration', $durationMinutes, PDO::PARAM_INT);
+            $perSet->execute();
+            if ($perSet->rowCount() === 0) {
+                // Fallback per-exercise
+                $perEx = $this->db->prepare("INSERT INTO workout_logs (member_id, workout_id, exercise_id, sets, reps, weight, duration, log_date)
+                    SELECT :member_id, we.workout_id, we.exercise_id, we.sets, we.reps, we.weight, :duration, CURDATE()
+                    FROM workout_exercises we
+                    WHERE we.workout_id = :workout_id");
+                $perEx->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+                $perEx->bindParam(':workout_id', $workout_id, PDO::PARAM_INT);
+                $perEx->bindParam(':duration', $durationMinutes, PDO::PARAM_INT);
+                $perEx->execute();
+            }
+            
+            return ['success' => true, 'message' => 'Workout completed successfully'];
+        } catch (Exception $e) {
+            // Return a JSON-safe error without leaking HTML
+            return ['success' => false, 'message' => 'Database error: '.$e->getMessage()];
+        }
     }
     
     // Add exercise to workout
@@ -180,21 +299,26 @@ class WorkoutController {
     
     // Create routine
     private function createRoutine($user_id) {
-        $name = $_POST['name'] ?? '';
-        $description = $_POST['description'] ?? '';
-        $is_public = $_POST['is_public'] ?? 0;
-        
-        if (empty($name)) {
-            return ['success' => false, 'message' => 'Routine name is required'];
+        try {
+            $name = $_POST['name'] ?? '';
+            $description = $_POST['description'] ?? '';
+            $is_public = $_POST['is_public'] ?? 0;
+            
+            if (empty($name)) {
+                return ['success' => false, 'message' => 'Routine name is required'];
+            }
+            
+            $routine_id = $this->routineModel->createRoutine($user_id, $name, $description, $is_public);
+            
+            if ($routine_id) {
+                return ['success' => true, 'routine_id' => $routine_id, 'message' => 'Routine created successfully'];
+            }
+            
+            return ['success' => false, 'message' => 'Failed to create routine'];
+        } catch (Exception $e) {
+            error_log("Create routine error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
         }
-        
-        $routine_id = $this->routineModel->createRoutine($user_id, $name, $description, $is_public);
-        
-        if ($routine_id) {
-            return ['success' => true, 'routine_id' => $routine_id, 'message' => 'Routine created successfully'];
-        }
-        
-        return ['success' => false, 'message' => 'Failed to create routine'];
     }
     
     // Update routine
@@ -234,10 +358,9 @@ class WorkoutController {
     private function addExerciseToRoutine($user_id) {
         $routine_id = $_POST['routine_id'] ?? 0;
         $exercise_id = $_POST['exercise_id'] ?? 0;
-        $sets = $_POST['sets'] ?? 0;
-        $reps = $_POST['reps'] ?? 0;
-        $weight = $_POST['weight'] ?? '';
-        $duration = $_POST['duration'] ?? null;
+        $sets = $_POST['sets'] ?? 3;
+        $reps = $_POST['reps'] ?? 10;
+        $weight = $_POST['weight'] ?? null;
         $notes = $_POST['notes'] ?? '';
         $order_index = $_POST['order_index'] ?? 0;
         
@@ -247,7 +370,7 @@ class WorkoutController {
             return ['success' => false, 'message' => 'Routine not found'];
         }
         
-        $result = $this->routineModel->addExerciseToRoutine($routine_id, $exercise_id, $sets, $reps, $weight, $duration, $notes, $order_index);
+        $result = $this->routineModel->addExerciseToRoutine($routine_id, $exercise_id, $sets, $reps, $weight, $notes, $order_index);
         
         if ($result) {
             return ['success' => true, 'message' => 'Exercise added to routine successfully'];
@@ -259,14 +382,13 @@ class WorkoutController {
     // Update exercise in routine
     private function updateExerciseInRoutine($user_id) {
         $routine_exercise_id = $_POST['routine_exercise_id'] ?? 0;
-        $sets = $_POST['sets'] ?? 0;
-        $reps = $_POST['reps'] ?? 0;
-        $weight = $_POST['weight'] ?? '';
-        $duration = $_POST['duration'] ?? null;
+        $sets = $_POST['sets'] ?? 3;
+        $reps = $_POST['reps'] ?? 10;
+        $weight = $_POST['weight'] ?? null;
         $notes = $_POST['notes'] ?? '';
         $order_index = $_POST['order_index'] ?? 0;
         
-        $result = $this->routineModel->updateExerciseInRoutine($routine_exercise_id, $sets, $reps, $weight, $duration, $notes, $order_index);
+        $result = $this->routineModel->updateExerciseInRoutine($routine_exercise_id, $sets, $reps, $weight, $notes, $order_index);
         
         if ($result) {
             return ['success' => true, 'message' => 'Exercise updated in routine successfully'];
@@ -329,6 +451,104 @@ class WorkoutController {
             'exercises' => $exercises,
             'categories' => $categories
         ];
+    }
+
+    // Handle routine detail view and actions
+    public function handleRoutineDetail($routine_id) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $user_id = $_SESSION['user_id'] ?? 0;
+
+        // Determine routine ownership / visibility
+        $routine = $this->routineModel->getRoutineById($routine_id, $user_id);
+        $can_edit = true;
+        if (!$routine) {
+            // Allow viewing public routines not owned by the user
+            $stmt = $this->db->prepare("SELECT routine_id as id, routine_name as name, description, is_public, created_at, user_id FROM workout_routines WHERE routine_id = :id AND is_public = 1");
+            $stmt->bindParam(':id', $routine_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $routine = $stmt->fetch(PDO::FETCH_ASSOC);
+            $can_edit = false;
+        }
+
+        // Handle AJAX actions
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $action = $_POST['action'] ?? '';
+
+            // Block modifications if user cannot edit
+            $modActions = ['add_exercise', 'update_exercise', 'remove_exercise'];
+            if (in_array($action, $modActions, true) && (!$routine || !$can_edit)) {
+                echo json_encode(['success' => false, 'message' => 'Not allowed']);
+                exit;
+            }
+
+            switch ($action) {
+                case 'add_exercise':
+                    echo json_encode($this->addExerciseToRoutine($user_id));
+                    exit;
+                case 'update_exercise':
+                    echo json_encode($this->updateExerciseInRoutine($user_id));
+                    exit;
+                case 'remove_exercise':
+                    echo json_encode($this->removeExerciseFromRoutine($user_id));
+                    exit;
+                case 'start_routine':
+                    // Only owners can start directly from their routine; for public, allow start as well (creates a new workout tied to routine)
+                    $routine_id_post = (int)($_POST['routine_id'] ?? 0);
+                    if (!$routine || (int)$routine['id'] !== $routine_id_post) {
+                        echo json_encode(['success' => false, 'message' => 'Invalid routine']);
+                        exit;
+                    }
+                    $resp = $this->startWorkoutFromRoutine($user_id, $routine_id_post);
+                    echo json_encode($resp);
+                    exit;
+                default:
+                    echo json_encode(['success' => false, 'message' => 'Unknown action']);
+                    exit;
+            }
+        }
+
+        $routine_exercises = $routine ? $this->routineModel->getExercisesForRoutine($routine_id) : [];
+        $all_exercises = $this->exerciseModel->getAllExercises();
+        $categories = $this->exerciseModel->getExerciseCategories();
+
+        return [
+            'routine' => $routine,
+            'routine_exercises' => $routine_exercises,
+            'all_exercises' => $all_exercises,
+            'categories' => $categories,
+            'can_edit' => $can_edit,
+        ];
+    }
+
+    // Create a workout from a routine and seed exercises
+    private function startWorkoutFromRoutine($user_id, $routine_id) {
+        // Prevent starting if there is an in-progress workout (no end_time)
+        $check = $this->db->query("SELECT workout_id FROM workouts WHERE end_time IS NULL LIMIT 1");
+        if ($check && $check->fetch(PDO::FETCH_ASSOC)) {
+            return ['success' => false, 'message' => 'You already have an in-progress workout. Please end it before starting a new one.'];
+        }
+
+        // Create workout record with date-only (no time)
+        $name = 'Workout ' . date('M j, Y');
+        $notes = '';
+        $workout_id = $this->workoutModel->createWorkout($user_id, $routine_id, $name, $notes);
+        if (!$workout_id) {
+            return ['success' => false, 'message' => 'Failed to create workout'];
+        }
+        // Seed exercises from routine_exercises into workout_exercises (sets, reps only)
+        $stmt = $this->db->prepare("INSERT INTO workout_exercises (workout_id, exercise_id, sets, reps)
+                                     SELECT :workout_id, re.exercise_id, re.sets, re.reps
+                                     FROM routine_exercises re
+                                     WHERE re.routine_id = :routine_id");
+        $stmt->bindParam(':workout_id', $workout_id, PDO::PARAM_INT);
+        $stmt->bindParam(':routine_id', $routine_id, PDO::PARAM_INT);
+        if (!$stmt->execute()) {
+            return ['success' => false, 'message' => 'Failed to seed exercises'];
+        }
+        return ['success' => true, 'workout_id' => $workout_id, 'message' => 'Routine started'];
     }
 }
 ?>

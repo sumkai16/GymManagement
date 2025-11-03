@@ -111,14 +111,16 @@ foreach ($current_config['items'] as $item) {
                         }
                     }
                     if (isset($item['type']) && $item['type'] === 'dropdown') {
-                        // Dropdown logic as before
-                        echo "<li class=\"nav-link " . ($is_active ? 'active' : '') . "\">";
-                        echo "<button class='dropdown-btn'><i class='bx " . htmlspecialchars($item['icon']) . " icon'></i><span class='text nav-text'>" . htmlspecialchars($item['text']) . "</span><i class='bx bx-chevron-down dropdown-arrow'></i></button></li>\n";
-                        echo "<div class='dropdown-container'>";
+                        // Render dropdown within a single <li> with nested <ul>
+                        $expanded = $is_active ? ' expanded' : '';
+                        echo "<li class=\"nav-link has-dropdown$expanded " . ($is_active ? 'active' : '') . "\">";
+                        echo "<button class='dropdown-btn'><i class='bx " . htmlspecialchars($item['icon']) . " icon'></i><span class='text nav-text'>" . htmlspecialchars($item['text']) . "</span><i class='bx bx-chevron-down dropdown-arrow'></i></button>";
+                        echo "<ul class='dropdown-container'" . ($is_active ? " style='display:block; opacity:1; transform:none;'" : "") . ">";
                         foreach ($item['submenu'] as $subitem) {
-                            echo "<a href='" . htmlspecialchars($subitem['url']) . "'><span class='text nav-text'>" . htmlspecialchars($subitem['text']) . "</span></a>\n";
+                            echo "<li><a href='" . htmlspecialchars($subitem['url']) . "'><span class='text nav-text'>" . htmlspecialchars($subitem['text']) . "</span></a></li>\n";
                         }
-                        echo "</div>\n";
+                        echo "</ul>";
+                        echo "</li>\n";
                     } else {
                         echo "<li class=\"nav-link " . ($is_active ? 'active' : '') . "\"><a href=\"" . htmlspecialchars($item['url']) . "\" data-tooltip=\"" . htmlspecialchars($item['text']) . "\"><i class='bx " . htmlspecialchars($item['icon']) . " icon'></i><span class='text nav-text'>" . htmlspecialchars($item['text']) . "</span></a></li>\n";
                     }

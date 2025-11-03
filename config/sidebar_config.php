@@ -154,43 +154,35 @@ return [
             ],
             [
                 'type' => 'section',
-                'label' => 'Operations'
+                'label' => 'Workout'
             ],
             [
                 'icon' => 'bx-dumbbell',
-                'text' => 'Workout',
-                'type' => 'dropdown',
-                'permissions' => ['member'],
-                'submenu' => [
-                    [
-                        'text' => 'Track Workout',
-                        'url' => 'workout.php',
-                        'permissions' => ['member']
-                    ],
-                    [
-                        'text' => 'Routines',
-                        'url' => 'workout_routines.php',
-                        'permissions' => ['member']
-                    ]
-                ]
+                'text' => 'Workout History',
+                'url' => 'workout.php',
+                'permissions' => ['member']
+            ],
+            [
+                'icon' => 'bx-list-ul',
+                'text' => 'Routines',
+                'url' => 'workout_routines.php',
+                'permissions' => ['member']
+            ],
+            [
+                'type' => 'section',
+                'label' => 'Nutrition'
             ],
             [
                 'icon' => 'bx-bowl-rice',
-                'text' => 'Nutrition',
-                'type' => 'dropdown',
-                'permissions' => ['member'],
-                'submenu' => [
-                    [
-                        'text' => 'Food',
-                        'url' => 'nutrition_food.php',
-                        'permissions' => ['member']
-                    ],
-                    [
-                        'text' => 'Supplement',
-                        'url' => 'nutrition-supplement.php',
-                        'permissions' => ['member']
-                    ]
-                ]
+                'text' => 'Food',
+                'url' => 'nutrition_food.php',
+                'permissions' => ['member']
+            ],
+            [
+                'icon' => 'bx-capsule',
+                'text' => 'Supplement',
+                'url' => 'nutrition-supplement.php',
+                'permissions' => ['member']
             ],
             [
                 'type' => 'section',

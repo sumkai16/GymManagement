@@ -1,6 +1,10 @@
 
 <?php
 session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
+    header("Location: ../auth/login.php");
+    exit;
+}
 // Fetch user's meals from the database
 require_once '../../config/database.php';
 require_once '../../models/Nutrition.php';
