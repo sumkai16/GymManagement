@@ -203,10 +203,11 @@ class WorkoutController {
                 if ($durationMinutes < 0) { $durationMinutes = 0; }
             }
 
-            // Insert logs per set if available; fallback to per exercise
+            // Insert logs per set if available; fallback to per exercise (members only)
             // Resolve member_id reliably from members table using session user_id
             $member_id = 0;
             $uid = (int)($_SESSION['user_id'] ?? 0);
+            $role = $_SESSION['role'] ?? '';
             if ($uid > 0) {
                 $mq = $this->db->prepare("SELECT member_id FROM members WHERE user_id = :uid LIMIT 1");
                 $mq->bindParam(':uid', $uid, PDO::PARAM_INT);
@@ -216,6 +217,10 @@ class WorkoutController {
                 }
             }
             if ($member_id <= 0) {
+                // If trainer is ending their own workout, skip logging to workout_logs (member-only table)
+                if ($role === 'trainer') {
+                    return ['success' => true, 'message' => 'Workout completed successfully'];
+                }
                 return ['success' => false, 'message' => 'Member profile not found for logging.'];
             }
             // Try per-set
@@ -388,6 +393,10 @@ class WorkoutController {
         if (!$routine) {
             return ['success' => false, 'message' => 'Routine not found'];
         }
+
+        if ($this->routineModel->routineHasExercise($routine_id, $exercise_id)) {
+            return ['success' => false, 'message' => 'Exercise already exists in this routine'];
+        }
         
         $result = $this->routineModel->addExerciseToRoutine($routine_id, $exercise_id, $sets, $reps, $weight, $notes, $order_index);
         
@@ -556,6 +565,17 @@ class WorkoutController {
             return ['success' => false, 'message' => 'You already have an in-progress workout. Please end it before starting a new one.'];
         }
 
+        // Server-side validation: ensure the routine has at least one exercise
+        $cntStmt = $this->db->prepare("SELECT COUNT(*) AS cnt FROM routine_exercises WHERE routine_id = :rid");
+        $cntStmt->bindParam(':rid', $routine_id, PDO::PARAM_INT);
+        if ($cntStmt->execute()) {
+            $cRow = $cntStmt->fetch(PDO::FETCH_ASSOC);
+            $exCount = (int)($cRow['cnt'] ?? 0);
+            if ($exCount <= 0) {
+                return ['success' => false, 'message' => 'Please add at least one exercise before starting this routine.'];
+            }
+        }
+
         // Create workout record with date-only (no time)
         $name = 'Workout ' . date('M j, Y');
         $notes = '';
@@ -601,38 +621,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             echo json_encode($response);
             exit;
-            
         case 'assign_routine':
         case 'assign_workout':
             $response = $controller->handleRoutineManagement();
             header('Content-Type: application/json');
             echo json_encode($response);
             exit;
-            
-        case 'start_workout':
-        case 'end_workout':
+        case 'start_routine':
+            $controller->handleRoutineDetail((int)($_POST['routine_id'] ?? 0));
+            exit;
         case 'add_exercise':
         case 'update_exercise':
         case 'remove_exercise':
+            if (!empty($_POST['routine_id'])) {
+                $controller->handleRoutineDetail((int)($_POST['routine_id'] ?? 0));
+                exit;
+            }
+            // Fall through to workout tracking when no routine context
+        case 'start_workout':
+        case 'end_workout':
         case 'set_exercise_done':
         case 'add_set':
         case 'update_set':
         case 'delete_set':
+        case 'delete_workout':
             $response = $controller->handleWorkoutTracking();
             header('Content-Type: application/json');
             echo json_encode($response);
-            exit;
-            
-        case 'delete_workout':
-            $workout_id = (int)($_POST['workout_id'] ?? 0);
-            if ($workout_id > 0) {
-                $response = $controller->deleteWorkout($user_id, $workout_id);
-                header('Content-Type: application/json');
-                echo json_encode($response);
-            } else {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Invalid workout ID']);
-            }
             exit;
     }
 }

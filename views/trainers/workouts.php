@@ -44,194 +44,35 @@ $routineData = $workoutController->handleRoutineManagement();
                 <p>Create and manage workout plans for your members and track their progress.</p>
             </div>
 
+    <?php 
+        $confirmData = [
+            'id' => 'delete-routine-confirm',
+            'title' => 'Delete Routine',
+            'message' => 'Are you sure you want to delete this routine? This action cannot be undone.',
+            'confirmText' => 'Delete',
+            'cancelText' => 'Cancel',
+            'confirmButtonClass' => 'danger',
+            'show' => true,
+        ];
+        include __DIR__ . '/../utilities/confirm_modal.php';
+    ?>
+
             <!-- Tabs Navigation -->
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('routines')">
                     <i class='bx bx-list-ul'></i> My Routines
                 </button>
-                <button class="tab" onclick="switchTab('clients')">
-                    <i class='bx bx-group'></i> Client Workouts
-                </button>
-                <button class="tab" onclick="switchTab('history')">
-                    <i class='bx bx-history'></i> Workout History
-                </button>
+                
             </div>
 
             <!-- My Routines Tab -->
             <div id="routines" class="tab-content active">
                 <div class="routines-container">
-                    <div class="routines-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3><i class='bx bx-list-ul'></i> My Workout Routines</h3>
-                            <button class="btn btn-primary" onclick="openCreateRoutineModal()">
-                                <i class='bx bx-plus'></i> New Routine
-                            </button>
-                        </div>
-                        <div class="routine-list">
-                            <?php if (!empty($routineData['routines'])): ?>
-                                <?php foreach ($routineData['routines'] as $routine): ?>
-                                    <div class="routine-item">
-                                        <div class="routine-header">
-                                            <div class="routine-info">
-                                                <h4><?= htmlspecialchars($routine['name']) ?></h4>
-                                                <p>
-                                                    <?= date('M j, Y', strtotime($routine['created_at'])) ?>
-                                                    <?php if ($routine['is_public']): ?>
-                                                        • <span style="color: #10b981;">Public</span>
-                                                    <?php endif; ?>
-                                                </p>
-                                            </div>
-                                            <div class="routine-actions">
-                                                <button class="btn btn-sm btn-primary" onclick="viewRoutine(<?= $routine['id'] ?>)">
-                                                    <i class='bx bx-show'></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-secondary" onclick="editRoutine(<?= $routine['id'] ?>)">
-                                                    <i class='bx bx-edit'></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-success" onclick="assignRoutine(<?= $routine['id'] ?>)">
-                                                    <i class='bx bx-user-plus'></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger" onclick="deleteRoutine(<?= $routine['id'] ?>)">
-                                                    <i class='bx bx-trash'></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="no-data">
-                                    <i class='bx bx-list-ul'></i>
-                                    <p>No routines created yet. Create your first routine!</p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                    <?php $role = 'trainer'; $routines = $routineData['routines'] ?? []; include __DIR__ . '/../shared/routines_section.php'; ?>
                 </div>
             </div>
 
-            <!-- Client Workouts Tab -->
-            <div id="clients" class="tab-content">
-                <h3><i class='bx bx-group'></i> Client Workout Progress</h3>
-                <div class="client-grid">
-                    <?php if (!empty($clients)): ?>
-                        <?php foreach ($clients as $client): ?>
-                            <div class="client-card">
-                                <div class="client-header">
-                                    <div class="client-info">
-                                        <h4><?= htmlspecialchars($client['full_name']) ?></h4>
-                                        <p><?= htmlspecialchars($client['email']) ?></p>
-                                        <p><span class="role-badge role-<?= $client['status'] ?>"><?= ucfirst($client['status']) ?></span></p>
-                                    </div>
-                                    <div class="client-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="viewClientWorkout(<?= $client['member_id'] ?>)">
-                                            <i class='bx bx-show'></i> View
-                                        </button>
-                                        <button class="btn btn-sm btn-info" onclick="createRoutineForClient(<?= $client['member_id'] ?>)">
-                                            <i class='bx bx-plus'></i> Create Routine
-                                        </button>
-                                        <button class="btn btn-sm btn-success" onclick="assignWorkoutToClient(<?= $client['member_id'] ?>)">
-                                            <i class='bx bx-list-plus'></i> Assign
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="client-stats">
-                                    <div class="stat-item">
-                                        <div class="value"><?= $client['membership_type'] ?></div>
-                                        <div class="label">Plan</div>
-                                    </div>
-                                    <div class="stat-item">
-                                        <div class="value"><?= date('M j', strtotime($client['start_date'])) ?></div>
-                                        <div class="label">Started</div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="no-data">
-                            <i class='bx bx-user-x'></i>
-                            <p>No clients assigned yet.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Workout History Tab -->
-            <div id="history" class="tab-content">
-                <div class="workout-container">
-                    <h3><i class='bx bx-history'></i> Workout History</h3>
-                    
-                    <!-- Quick Stats -->
-                    <div class="quick-stats">
-                        <div class="stat-card">
-                            <h4><?= $data['stats']['total_workouts'] ?? 0 ?></h4>
-                            <p>Total Workouts</p>
-                        </div>
-                        <div class="stat-card">
-                            <h4><?= $data['stats']['active_days'] ?? 0 ?></h4>
-                            <p>Active Days</p>
-                        </div>
-                        <div class="stat-card">
-                            <h4><?= round($data['stats']['avg_duration'] ?? 0) ?>m</h4>
-                            <p>Avg Duration</p>
-                        </div>
-                    </div>
-                    
-                    <h3><i class='bx bx-history'></i> All Workouts</h3>
-                    <?php if (!empty($data['workouts'])): ?>
-                        <div class="history-wrap">
-                            <div class="history-grid">
-                                <?php foreach ($data['workouts'] as $workout): ?>
-                                    <?php 
-                                        $created = $workout['created_at'] ?? null;
-                                        $ended = $workout['end_time'] ?? null;
-                                        $dur = 0;
-                                        if ($created && $ended) {
-                                            $dur = max(0, (int)ceil((strtotime($ended) - strtotime($created))/60));
-                                        }
-                                        $isInProgress = empty($ended);
-                                        $statusLabel = $isInProgress ? 'In Progress' : 'Completed';
-                                        $statusStyle = $isInProgress
-                                            ? "background:#fde68a;color:#92400e;border-color:#fcd34d;"
-                                            : "background:#dcfce7;color:#166534;border-color:#86efac;";
-                                    ?>
-                                    <div class="workout-card">
-                                        <div class="card-title">
-                                            <h4 style="margin:0; font-size:1.05rem; color:#223;"><?= htmlspecialchars($workout['workout_name'] ?? 'Workout') ?></h4>
-                                            <?php if (!empty($workout['routine_name'])): ?>
-                                                <a class="chip" href="workout_routine_detail.php?id=<?= (int)($workout['routine_id'] ?? 0) ?>">
-                                                    <i class='bx bx-list-ul'></i><?= htmlspecialchars($workout['routine_name']) ?>
-                                                </a>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="meta">
-                                            <span title="Date"><i class='bx bx-calendar'></i> <?= $created ? date('M j, Y · g:i A', strtotime($created)) : '' ?></span>
-                                            <?php if ($dur > 0): ?>
-                                                <span title="Duration"><i class='bx bx-time'></i> <?= $dur ?>m</span>
-                                            <?php endif; ?>
-                                            <span class="chip" style="<?= $statusStyle ?>">
-                                                <i class='bx bx-flag'></i> <?= $statusLabel ?>
-                                            </span>
-                                        </div>
-                                        <div class="card-actions">
-                                            <button class="btn btn-primary" onclick="viewWorkout(<?= (int)$workout['workout_id'] ?>)">
-                                                <i class='bx bx-show'></i> View
-                                            </button>
-                                            <button class="btn btn-danger" onclick="deleteWorkout(<?= (int)$workout['workout_id'] ?>)">
-                                                <i class='bx bx-trash'></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <div class="no-data">
-                            <i class='bx bx-dumbbell'></i>
-                            <p>No workouts yet.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -478,30 +319,33 @@ $routineData = $workoutController->handleRoutineManagement();
             }
         }
 
+        let pendingDeleteRoutineId = null;
+        document.addEventListener('DOMContentLoaded', function(){
+            const m = document.getElementById('delete-routine-confirm');
+            if(m){ m.style.display = 'none'; }
+        });
         function deleteRoutine(routineId) {
-            if (confirm('Are you sure you want to delete this routine?')) {
+            pendingDeleteRoutineId = routineId;
+            const modalId = 'delete-routine-confirm';
+            window.confirmModalActions = window.confirmModalActions || {};
+            window.confirmModalActions[modalId] = function(){
                 const formData = new FormData();
                 formData.append('action', 'delete_routine');
-                formData.append('routine_id', routineId);
-                
-                fetch('../../controllers/WorkoutController.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
+                formData.append('routine_id', pendingDeleteRoutineId);
+                fetch('../../controllers/WorkoutController.php', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
                         location.reload();
                     } else {
-                        alert(data.message);
+                        alert(d.message || 'Failed to delete routine');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Check console for details.');
-                });
-            }
+                .catch(err => { console.error(err); alert('Network error'); })
+                .finally(() => { pendingDeleteRoutineId = null; });
+            };
+            const modal = document.getElementById(modalId);
+            if (modal) { modal.style.display = 'flex'; }
         }
 
         function viewWorkout(workoutId) {

@@ -88,10 +88,12 @@ class Workout {
             SELECT 
                 COUNT(*) as total_workouts,
                 COUNT(DISTINCT DATE(w.created_at)) as active_days,
-                0 as avg_duration
+                COALESCE(ROUND(AVG(TIMESTAMPDIFF(MINUTE, w.created_at, w.end_time))), 0) as avg_duration
             FROM workouts w
             JOIN workout_routines wr ON w.routine_id = wr.routine_id
-            WHERE wr.user_id = :user_id AND w.created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+            WHERE wr.user_id = :user_id 
+              AND w.created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+              AND w.end_time IS NOT NULL
         ");
         $stmt->bindParam(':days', $days, PDO::PARAM_INT);
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);

@@ -84,10 +84,18 @@ return [
         'welcome_text' => 'Welcome,',
         'items' => [
             [
+                'type' => 'section',
+                'label' => 'Overview'
+            ],
+            [
                 'icon' => 'bx-home-alt',
                 'text' => 'Dashboard',
                 'url' => 'trainers_dashboard.php',
                 'permissions' => ['trainer']
+            ],
+            [
+                'type' => 'section',
+                'label' => 'People'
             ],
             [
                 'icon' => 'bx-user',
@@ -96,10 +104,24 @@ return [
                 'permissions' => ['trainer']
             ],
             [
+                'type' => 'section',
+                'label' => 'Workout'
+            ],
+            [
                 'icon' => 'bx-dumbbell',
                 'text' => 'Workouts',
                 'url' => 'workouts.php',
                 'permissions' => ['trainer']
+            ],
+            [
+                'icon' => 'bx-history',
+                'text' => 'Workout History',
+                'url' => 'workout_history.php',
+                'permissions' => ['trainer']
+            ],
+            [
+                'type' => 'section',
+                'label' => 'Schedule'
             ],
             [
                 'icon' => 'bx-calendar',
@@ -108,17 +130,32 @@ return [
                 'permissions' => ['trainer']
             ],
             [
+                'type' => 'section',
+                'label' => 'Nutrition'
+            ],
+            [
+                'icon' => 'bx-bowl-rice',
+                'text' => 'Food',
+                'url' => 'nutrition_food.php',
+                'permissions' => ['trainer']
+            ],
+            [
+                'icon' => 'bx-capsule',
+                'text' => 'Supplement',
+                'url' => 'nutrition_supplement.php',
+                'permissions' => ['trainer']
+            ],
+            [
+                'type' => 'section',
+                'label' => 'Insights'
+            ],
+            [
                 'icon' => 'bx-chart',
                 'text' => 'Progress',
                 'url' => 'progress.php',
                 'permissions' => ['trainer']
-            ],
-            [
-                'icon' => 'bx-message',
-                'text' => 'Messages',
-                'url' => 'messages.php',
-                'permissions' => ['trainer']
             ]
+           
         ]
     ],
     

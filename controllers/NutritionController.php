@@ -20,14 +20,34 @@ class NutritionController {
             $action = $_POST['action'] ?? '';
             switch ($action) {
                 case 'add_meal':
-                    $id = $this->model->addMeal($user_id,
-                        trim($_POST['food_item'] ?? ''),
-                        (int)($_POST['calories'] ?? 0),
-                        (float)($_POST['protein'] ?? 0),
-                        (float)($_POST['carbs'] ?? 0),
-                        (float)($_POST['fats'] ?? 0),
-                        $_POST['date'] ?? null
-                    );
+                    // Support auto-calc via food_id/name + weight_g; fallback to manual fields
+                    $food_item = trim($_POST['food_item'] ?? '');
+                    $food_id   = (int)($_POST['food_id'] ?? 0);
+                    $weight_g  = (float)($_POST['weight_g'] ?? 0);
+                    $date      = $_POST['date'] ?? null;
+                    $cal = (float)($_POST['calories'] ?? 0);
+                    $pro = (float)($_POST['protein'] ?? 0);
+                    $car = (float)($_POST['carbs'] ?? 0);
+                    $fat = (float)($_POST['fats'] ?? 0);
+                    if (($food_id || $food_item) && $weight_g > 0) {
+                        // Compute macros from food database
+                        $foodRow = null;
+                        if ($food_id) {
+                            $foodRow = $this->model->getFoodById($food_id);
+                        }
+                        if (!$foodRow && $food_item) {
+                            $hits = $this->model->searchFoodByName($food_item, 1);
+                            if (!empty($hits)) { $foodRow = $hits[0]; }
+                        }
+                        if ($foodRow) {
+                            $food_item = $food_item ?: ($foodRow['name'] ?? 'Food');
+                            $cal = round(((float)$foodRow['kcal_per_100g'] * $weight_g) / 100);
+                            $pro = round(((float)$foodRow['protein_per_100g'] * $weight_g) / 100, 2);
+                            $car = round(((float)$foodRow['carbs_per_100g'] * $weight_g) / 100, 2);
+                            $fat = round(((float)$foodRow['fats_per_100g'] * $weight_g) / 100, 2);
+                        }
+                    }
+                    $id = $this->model->addMeal($user_id, $food_item, $cal, $pro, $car, $fat, $date);
                     $msg = $id ? 'Meal added' : 'Failed to add meal';
                     $this->redirectBack($msg, (bool)$id);
                 case 'update_meal':
@@ -58,11 +78,44 @@ class NutritionController {
                     $this->redirectBack($ok ? 'Supplement deleted' : 'Failed to delete supplement', $ok);
             }
         }
-        // GET helpers (AJAX): today totals
-        if (isset($_GET['action']) && $_GET['action'] === 'today_totals') {
+        // GET helpers (AJAX)
+        if (isset($_GET['action'])) {
             header('Content-Type: application/json');
-            echo json_encode($this->model->getTodayMacros($user_id));
-            return;
+            switch ($_GET['action']) {
+                case 'today_totals':
+                    echo json_encode($this->model->getTodayMacros($user_id));
+                    return;
+                case 'search_food':
+                    $q = $_GET['q'] ?? '';
+                    echo json_encode($this->model->searchFoodByName($q, 10));
+                    return;
+                case 'compute_macros':
+                    $weight = (float)($_GET['weight_g'] ?? 0);
+                    $fid = (int)($_GET['food_id'] ?? 0);
+                    $name = trim($_GET['food_name'] ?? '');
+                    $row = null;
+                    if ($fid) { $row = $this->model->getFoodById($fid); }
+                    if (!$row && $name) {
+                        $hits = $this->model->searchFoodByName($name, 1);
+                        if (!empty($hits)) { $row = $hits[0]; }
+                    }
+                    if (!$row || $weight <= 0) {
+                        echo json_encode(['success' => false, 'message' => 'Food not found or weight missing']);
+                        return;
+                    }
+                    $resp = [
+                        'success' => true,
+                        'food' => $row,
+                        'computed' => [
+                            'calories' => round(((float)$row['kcal_per_100g'] * $weight) / 100),
+                            'protein'  => round(((float)$row['protein_per_100g'] * $weight) / 100, 2),
+                            'carbs'    => round(((float)$row['carbs_per_100g'] * $weight) / 100, 2),
+                            'fats'     => round(((float)$row['fats_per_100g'] * $weight) / 100, 2),
+                        ]
+                    ];
+                    echo json_encode($resp);
+                    return;
+            }
         }
         // Unknown request
         $this->redirectBack();

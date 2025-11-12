@@ -84,16 +84,32 @@ $completedToday = $member->hasWorkoutCompletedToday($_SESSION['user_id']);
                     <div class="workout-card">
                         <div class="workout-info">
                             <h3><?php echo htmlspecialchars($data['todays_workout']); ?></h3>
-                            <p class="workout-time">45 minutes • 2:30 PM</p>
+                            <?php 
+                                $dur = (int)($data['todays_duration'] ?? 0);
+                                $timeLabel = $data['todays_time'] ?? '';
+                                $metaParts = [];
+                                if ($dur > 0) { $metaParts[] = $dur . ' minutes'; }
+                                if (!empty($timeLabel)) { $metaParts[] = $timeLabel; }
+                            ?>
+                            <p class="workout-time"><?php echo !empty($metaParts) ? implode(' • ', $metaParts) : 'No workout started today'; ?></p>
                             <div class="workout-exercises">
-                                <span class="exercise-tag">Bench Press</span>
-                                <span class="exercise-tag">Pull-ups</span>
-                                <span class="exercise-tag">Shoulder Press</span>
+                                <?php if (!empty($data['todays_exercises'])): ?>
+                                    <?php foreach ($data['todays_exercises'] as $ex): ?>
+                                        <span class="exercise-tag"><?php echo htmlspecialchars($ex); ?></span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="exercise-tag">No exercises</span>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="workout-status">
-                            <?php if (!empty($completedToday)): ?>
+                            <?php 
+                                $status = $data['todays_status'] ?? (empty($completedToday) ? 'in_progress' : 'completed');
+                            ?>
+                            <?php if ($status === 'completed'): ?>
                                 <span class="status-completed">Completed</span>
+                            <?php elseif ($status === 'in_progress'): ?>
+                                <span class="status-in-progress">In Progress</span>
                             <?php else: ?>
                                 <span class="status-in-progress">Pending</span>
                             <?php endif; ?>

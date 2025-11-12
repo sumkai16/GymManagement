@@ -124,5 +124,22 @@ class Nutrition {
         $today = date('Y-m-d');
         return $this->getDailyTotals($user_id, $today);
     }
+
+    // Food database helpers (per-100g macros)
+    public function searchFoodByName($query, $limit = 10) {
+        $q = '%' . strtolower(trim($query)) . '%';
+        $stmt = $this->conn->prepare("SELECT food_id, name, kcal_per_100g, protein_per_100g, carbs_per_100g, fats_per_100g FROM food_database WHERE LOWER(name) LIKE :q ORDER BY name ASC LIMIT :lim");
+        $stmt->bindParam(':q', $q);
+        $stmt->bindValue(':lim', (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getFoodById($food_id) {
+        $stmt = $this->conn->prepare("SELECT food_id, name, kcal_per_100g, protein_per_100g, carbs_per_100g, fats_per_100g FROM food_database WHERE food_id = :id LIMIT 1");
+        $stmt->bindParam(':id', $food_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

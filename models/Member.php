@@ -26,8 +26,13 @@ class Member {
         // Strength gain: perhaps total weight lifted increase, but complex. For now, placeholder
         $data['strength_gain'] = '+2.5kg'; // Placeholder
 
-        // Today's workout: assume latest routine
-        $data['todays_workout'] = $this->getTodaysWorkout($user_id);
+        // Today's workout: fetch today's workout (with details)
+        $tw = $this->getTodaysWorkoutDetails($user_id);
+        $data['todays_workout'] = $tw['name'] ?? 'No workout started today';
+        $data['todays_duration'] = $tw['duration_minutes'] ?? 0;
+        $data['todays_time'] = $tw['time_label'] ?? '';
+        $data['todays_status'] = $tw['status'] ?? 'none';
+        $data['todays_exercises'] = $tw['exercises'] ?? [];
 
         // Nutrition today
         $data['nutrition_today'] = $this->getNutritionToday($user_id);
@@ -121,14 +126,44 @@ class Member {
         return 'No recent workout';
     }
 
-    private function getTodaysWorkout($user_id) {
-        // Assume latest routine
-        $query = "SELECT routine_name FROM workout_routines WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 1";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
+    private function getTodaysWorkoutDetails($user_id) {
+        // Find today's workout for this user based on created_at date
+        $sql = "SELECT w.workout_id, w.workout_name, w.created_at, w.end_time, wr.routine_name
+                FROM workouts w
+                JOIN workout_routines wr ON w.routine_id = wr.routine_id
+                WHERE wr.user_id = :uid AND DATE(w.created_at) = CURDATE()
+                ORDER BY w.created_at DESC LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':uid', $user_id, PDO::PARAM_INT);
         $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? $result['routine_name'] : 'No workout planned';
+        $w = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$w) { return []; }
+        $created = isset($w['created_at']) ? strtotime($w['created_at']) : null;
+        $ended = !empty($w['end_time']) ? strtotime($w['end_time']) : null;
+        $now = time();
+        $durMin = 0;
+        if ($created) {
+            $durMin = (int)ceil((($ended ?: $now) - $created) / 60);
+            if ($durMin < 0) { $durMin = 0; }
+        }
+        $timeLabel = $created ? date('g:i A', $created) : '';
+        // Pull up to 3 exercise names from this workout
+        $exq = $this->conn->prepare("SELECT e.name AS exercise_name
+                                     FROM workout_exercises we
+                                     JOIN exercises e ON we.exercise_id = e.exercise_id
+                                     WHERE we.workout_id = :wid
+                                     ORDER BY we.we_id ASC LIMIT 3");
+        $exq->bindParam(':wid', $w['workout_id'], PDO::PARAM_INT);
+        $exq->execute();
+        $exRows = $exq->fetchAll(PDO::FETCH_ASSOC);
+        $exNames = array_map(function($r){ return $r['exercise_name'] ?? ''; }, $exRows);
+        return [
+            'name' => ($w['routine_name'] ?: ($w['workout_name'] ?? 'Workout')),
+            'duration_minutes' => $durMin,
+            'time_label' => $timeLabel,
+            'status' => $ended ? 'completed' : 'in_progress',
+            'exercises' => $exNames,
+        ];
     }
 
     private function getNutritionToday($user_id) {

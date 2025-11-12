@@ -99,6 +99,14 @@ class WorkoutRoutine {
         }
         return false;
     }
+
+    public function routineHasExercise($routine_id, $exercise_id) {
+        $stmt = $this->conn->prepare("SELECT 1 FROM routine_exercises WHERE routine_id = :routine_id AND exercise_id = :exercise_id LIMIT 1");
+        $stmt->bindParam(':routine_id', $routine_id, PDO::PARAM_INT);
+        $stmt->bindParam(':exercise_id', $exercise_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return (bool) $stmt->fetchColumn();
+    }
     
     // Get exercises for a routine
     public function getExercisesForRoutine($routine_id) {

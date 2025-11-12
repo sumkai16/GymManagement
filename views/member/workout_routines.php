@@ -45,53 +45,7 @@ $data = $workoutController->handleRoutineManagement();
             </div>
             
             <div class="routines-container">
-                <!-- My Routines -->
-                <div class="routines-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3><i class='bx bx-list-ul'></i> My Routines</h3>
-                        <button class="btn btn-primary" onclick="openCreateRoutineModal()">
-                            <i class='bx bx-plus'></i> New Routine
-                        </button>
-                    </div>
-                    <div class="routine-list">
-                        <?php if (!empty($data['routines'])): ?>
-                            <?php foreach ($data['routines'] as $routine): ?>
-                                <div class="routine-item">
-                                    <div class="routine-header">
-                                        <div class="routine-info">
-                                            <h4><?= htmlspecialchars($routine['name']) ?></h4>
-                                            <p>
-                                                <?= date('M j, Y', strtotime($routine['created_at'])) ?>
-                                                <?php if ($routine['is_public']): ?>
-                                                    • <span style="color: #10b981;">Public</span>
-                                                <?php endif; ?>
-                                            </p>
-                                        </div>
-                                        <div class="routine-actions">
-                                            <button class="btn btn-sm btn-primary" onclick="viewRoutine(<?= $routine['id'] ?>)">
-                                                <i class='bx bx-show'></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-secondary" onclick="editRoutine(<?= $routine['id'] ?>)">
-                                                <i class='bx bx-edit'></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteRoutine(<?= $routine['id'] ?>)">
-                                                <i class='bx bx-trash'></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="no-data">
-                                <i class='bx bx-list-ul'></i>
-                                <p>No routines created yet. Create your first routine!</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                
-                
+                <?php $role = 'member'; $routines = $data['routines'] ?? []; include __DIR__ . '/../shared/routines_section.php'; ?>
             </div>
         </div>
     </div>
@@ -121,6 +75,18 @@ $data = $workoutController->handleRoutineManagement();
             </form>
         </div>
     </div>
+    <?php 
+        $confirmData = [
+            'id' => 'delete-routine-confirm',
+            'title' => 'Delete Routine',
+            'message' => 'Are you sure you want to delete this routine? This action cannot be undone.',
+            'confirmText' => 'Delete',
+            'cancelText' => 'Cancel',
+            'confirmButtonClass' => 'danger',
+            'show' => true,
+        ];
+        include __DIR__ . '/../utilities/confirm_modal.php';
+    ?>
     
     <!-- Add Exercise to Routine Modal -->
     <div id="addExerciseModal" class="modal">
@@ -194,30 +160,33 @@ $data = $workoutController->handleRoutineManagement();
             window.location.href = `workout_routine_detail.php?id=${routineId}`;
         }
         
+        let pendingDeleteRoutineId = null;
+        document.addEventListener('DOMContentLoaded', function(){
+            const m = document.getElementById('delete-routine-confirm');
+            if(m){ m.style.display = 'none'; }
+        });
         function deleteRoutine(routineId) {
-            if (confirm('Are you sure you want to delete this routine?')) {
+            pendingDeleteRoutineId = routineId;
+            const modalId = 'delete-routine-confirm';
+            window.confirmModalActions = window.confirmModalActions || {};
+            window.confirmModalActions[modalId] = function(){
                 const formData = new FormData();
                 formData.append('action', 'delete_routine');
-                formData.append('routine_id', routineId);
-                
-                fetch('workout_routines.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
+                formData.append('routine_id', pendingDeleteRoutineId);
+                fetch('workout_routines.php', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
                         location.reload();
                     } else {
-                        alert(data.message);
+                        alert(d.message || 'Failed to delete routine');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Check console for details.');
-                });
-            }
+                .catch(err => { console.error(err); alert('Network error'); })
+                .finally(() => { pendingDeleteRoutineId = null; });
+            };
+            const modal = document.getElementById(modalId);
+            if (modal) { modal.style.display = 'flex'; }
         }
         
         function copyRoutine(routineId) {
