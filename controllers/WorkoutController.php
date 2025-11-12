@@ -576,4 +576,64 @@ class WorkoutController {
         return ['success' => true, 'workout_id' => $workout_id, 'message' => 'Routine started'];
     }
 }
+
+// Main request handling
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$controller = new WorkoutController();
+
+// Handle POST requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    $user_id = $_SESSION['user_id'] ?? 0;
+    
+    switch ($action) {
+        case 'create_routine':
+        case 'update_routine':
+        case 'delete_routine':
+        case 'add_exercise_to_routine':
+        case 'update_exercise_in_routine':
+        case 'remove_exercise_from_routine':
+        case 'copy_routine':
+            $response = $controller->handleRoutineManagement();
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+            
+        case 'assign_routine':
+        case 'assign_workout':
+            $response = $controller->handleRoutineManagement();
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+            
+        case 'start_workout':
+        case 'end_workout':
+        case 'add_exercise':
+        case 'update_exercise':
+        case 'remove_exercise':
+        case 'set_exercise_done':
+        case 'add_set':
+        case 'update_set':
+        case 'delete_set':
+            $response = $controller->handleWorkoutTracking();
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+            
+        case 'delete_workout':
+            $workout_id = (int)($_POST['workout_id'] ?? 0);
+            if ($workout_id > 0) {
+                $response = $controller->deleteWorkout($user_id, $workout_id);
+                header('Content-Type: application/json');
+                echo json_encode($response);
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Invalid workout ID']);
+            }
+            exit;
+    }
+}
 ?>

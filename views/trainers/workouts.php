@@ -126,8 +126,11 @@ $routineData = $workoutController->handleRoutineManagement();
                                         <button class="btn btn-sm btn-primary" onclick="viewClientWorkout(<?= $client['member_id'] ?>)">
                                             <i class='bx bx-show'></i> View
                                         </button>
+                                        <button class="btn btn-sm btn-info" onclick="createRoutineForClient(<?= $client['member_id'] ?>)">
+                                            <i class='bx bx-plus'></i> Create Routine
+                                        </button>
                                         <button class="btn btn-sm btn-success" onclick="assignWorkoutToClient(<?= $client['member_id'] ?>)">
-                                            <i class='bx bx-plus'></i> Assign
+                                            <i class='bx bx-list-plus'></i> Assign
                                         </button>
                                     </div>
                                 </div>
@@ -242,11 +245,19 @@ $routineData = $workoutController->handleRoutineManagement();
             <form id="routineForm">
                 <input type="hidden" name="action" id="routineAction" value="create_routine">
                 <input type="hidden" name="routine_id" id="routineId">
+                <input type="hidden" name="member_id" id="routine_client_id">
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="routine_name">Routine Name</label>
                         <input type="text" id="routine_name" name="name" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="routine_description">Description (Optional)</label>
+                        <textarea id="routine_description" name="description" rows="3" placeholder="Describe this routine..."></textarea>
                     </div>
                 </div>
                 
@@ -287,18 +298,70 @@ $routineData = $workoutController->handleRoutineManagement();
         </div>
     </div>
 
-    <?php 
-        $confirmData = [
-            'id' => 'delete-workout-confirm',
-            'title' => 'Delete Workout',
-            'message' => 'Are you sure you want to delete this workout?',
-            'confirmText' => 'Delete',
-            'cancelText' => 'Cancel',
-            'confirmButtonClass' => 'danger',
-            'show' => true,
-        ];
-        include __DIR__ . '/../utilities/confirm_modal.php';
-    ?>
+    <!-- Assign Workout Modal -->
+    <div id="assignWorkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Assign Workout to Client</h3>
+                <span class="close" onclick="closeModal('assignWorkoutModal')">&times;</span>
+            </div>
+            <form id="assignWorkoutForm">
+                <input type="hidden" name="action" value="assign_workout">
+                <input type="hidden" name="member_id" id="member_id">
+                
+                <div class="form-group">
+                    <label for="workout_select">Select Workout/Routine</label>
+                    <select id="workout_select" name="workout_id" required>
+                        <option value="">Choose a workout or routine...</option>
+                        <?php if (!empty($routineData['routines'])): ?>
+                            <optgroup label="My Routines">
+                                <?php foreach ($routineData['routines'] as $routine): ?>
+                                    <option value="routine_<?= $routine['id'] ?>"><?= htmlspecialchars($routine['name']) ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endif; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="schedule_date">Schedule Date</label>
+                    <input type="date" id="schedule_date" name="schedule_date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="schedule_time">Schedule Time</label>
+                    <input type="time" id="schedule_time" name="schedule_time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workout_notes">Notes (Optional)</label>
+                    <textarea id="workout_notes" name="notes" rows="3" placeholder="Add any special instructions..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('assignWorkoutModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign Workout</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Workout Confirmation Modal -->
+    <div id="delete-workout-confirm" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Workout</h3>
+                <span class="close" onclick="closeModal('delete-workout-confirm')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this workout?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('delete-workout-confirm')">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteWorkout()">Delete</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Tab switching
@@ -331,6 +394,7 @@ $routineData = $workoutController->handleRoutineManagement();
             document.getElementById('routineModalTitle').textContent = 'Create New Routine';
             document.getElementById('routineAction').value = 'create_routine';
             document.getElementById('routineId').value = '';
+            document.getElementById('routine_client_id').value = '';
             document.getElementById('routineForm').reset();
             openModal('routineModal');
         }
@@ -356,8 +420,62 @@ $routineData = $workoutController->handleRoutineManagement();
         }
 
         function assignWorkoutToClient(memberId) {
-            // This could open a modal to assign a workout or routine
-            alert('Assign workout functionality coming soon!');
+            // Get selected client info
+            const clientSelect = document.getElementById('assign_client_id');
+            const memberSelect = document.getElementById('member_id');
+            
+            // Set the selected client in the assign modal
+            if (memberSelect) {
+                memberSelect.value = memberId;
+            }
+            
+            // Open the assign workout modal
+            openModal('assignWorkoutModal');
+        }
+
+        function createRoutineForClient(memberId) {
+            // Set the client for whom we're creating the routine
+            document.getElementById('routine_client_id').value = memberId;
+            
+            // Update modal title
+            document.getElementById('routineModalTitle').textContent = 'Create Routine for Client';
+            
+            // Open create routine modal
+            openCreateRoutineModal();
+        }
+
+        function confirmDeleteWorkout() {
+            if (pendingDeleteId) {
+                const formData = new FormData();
+                formData.append('action', 'delete_workout');
+                formData.append('workout_id', pendingDeleteId);
+                
+                fetch('../../controllers/WorkoutController.php', { 
+                    method: 'POST', 
+                    body: formData 
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Failed to delete workout');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('Network error: ' + error.message);
+                })
+                .finally(() => { 
+                    pendingDeleteId = null; 
+                    closeModal('delete-workout-confirm');
+                });
+            }
         }
 
         function deleteRoutine(routineId) {
@@ -464,6 +582,36 @@ $routineData = $workoutController->handleRoutineManagement();
                     closeModal('assignRoutineModal');
                 } else {
                     alert(data.message || 'Failed to assign routine');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Network error: ' + error.message);
+            });
+        });
+
+        document.getElementById('assignWorkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('../../controllers/WorkoutController.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Workout assigned successfully!');
+                    closeModal('assignWorkoutModal');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to assign workout');
                 }
             })
             .catch(error => {

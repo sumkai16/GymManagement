@@ -31,31 +31,47 @@ $username = $_SESSION['username'] ?? 'Trainer';
                 <p>Here are the members who booked with you, <?php echo htmlspecialchars($username); ?>.</p>
             </div>
 
-            <div class="card">
-                <table class="users-table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($clients)): ?>
-                            <tr><td colspan="4" style="text-align:center; padding:16px;">No clients yet.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($clients as $c): ?>
+            <div class="card" style="margin-top: 2rem; padding: 2rem;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0; color: var(--primary-color); font-size: 1.3rem;">Client List</h3>
+                    <p style="margin: 0.5rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">Manage your training clients</p>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="users-table" style="width:100%; margin: 0;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--border-color);">Name</th>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--border-color);">Email</th>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--border-color);">Phone</th>
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid var(--border-color);">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($clients)): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($c['full_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($c['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($c['phone'] ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($c['status'] ?? ''); ?></td>
+                                    <td colspan="4" style="text-align:center; padding: 3rem 1rem; color: var(--text-muted); font-size: 1rem;">
+                                        <i class='bx bx-user-x' style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                                        No clients yet.
+                                    </td>
                                 </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                            <?php else: ?>
+                                <?php foreach ($clients as $c): ?>
+                                    <tr style="border-bottom: 1px solid var(--border-light); transition: var(--tran-02);">
+                                        <td style="padding: 1rem; font-weight: 500;"><?php echo htmlspecialchars($c['full_name']); ?></td>
+                                        <td style="padding: 1rem; color: var(--text-muted);"><?php echo htmlspecialchars($c['email']); ?></td>
+                                        <td style="padding: 1rem; color: var(--text-muted);"><?php echo htmlspecialchars($c['phone'] ?? 'N/A'); ?></td>
+                                        <td style="padding: 1rem;">
+                                            <span style="padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; background: <?php echo ($c['status'] ?? '') === 'active' ? 'var(--success-color)' : 'var(--warning-color)'; ?>; color: white;">
+                                                <?php echo htmlspecialchars(ucfirst($c['status'] ?? 'Inactive')); ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

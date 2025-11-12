@@ -232,7 +232,7 @@ class Booking {
             if (!in_array($status, $allowed)) {
                 return ['success' => false, 'message' => 'Invalid status'];
             }
-            // Ensure booking belongs to trainer and is still actionable
+            
             $stmt = $this->conn->prepare("SELECT status FROM trainer_bookings WHERE booking_id = :booking_id AND trainer_id = :trainer_id");
             $stmt->bindParam(':booking_id', $booking_id, PDO::PARAM_INT);
             $stmt->bindParam(':trainer_id', $trainer_id, PDO::PARAM_INT);

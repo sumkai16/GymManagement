@@ -145,8 +145,13 @@ class Trainer {
                     return ['success' => false, 'message' => 'Username already exists'];
                 }
 
+                // Split full name into first and last name
+                $name_parts = explode(' ', $full_name, 2);
+                $first_name = $name_parts[0];
+                $last_name = isset($name_parts[1]) ? $name_parts[1] : '';
+                
                 // Add user
-                $user_result = $userModel->register($username, $password, 'trainer', 'active');
+                $user_result = $userModel->register($username, $password, $email, $first_name, $last_name, '', 'trainer', 'active');
                 if (!$user_result) {
                     $this->conn->rollBack();
                     return ['success' => false, 'message' => 'Failed to create user account'];
