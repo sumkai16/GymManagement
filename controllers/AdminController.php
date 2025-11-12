@@ -218,24 +218,40 @@ class AdminController {
             $stats = [];
 
             // Total Members
-            $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM members WHERE status = 'active'");
-            $stmt->execute();
-            $stats['total_members'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            try {
+                $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM members WHERE status = 'active'");
+                $stmt->execute();
+                $stats['total_members'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            } catch (PDOException $e) {
+                $stats['total_members'] = 0;
+            }
 
             // Active Trainers
-            $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM trainers t JOIN users u ON t.user_id = u.user_id WHERE u.status = 'active'");
-            $stmt->execute();
-            $stats['active_trainers'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            try {
+                $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM trainers t JOIN users u ON t.user_id = u.user_id WHERE u.status = 'active'");
+                $stmt->execute();
+                $stats['active_trainers'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            } catch (PDOException $e) {
+                $stats['active_trainers'] = 0;
+            }
 
-            // Monthly Revenue (assuming payments table exists)
-            $stmt = $this->db->prepare("SELECT COALESCE(SUM(amount), 0) as revenue FROM payments WHERE DATE_FORMAT(payment_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')");
-            $stmt->execute();
-            $stats['monthly_revenue'] = $stmt->fetch(PDO::FETCH_ASSOC)['revenue'];
+            // Monthly Revenue - check if payments table exists
+            try {
+                $stmt = $this->db->prepare("SELECT COALESCE(SUM(amount), 0) as revenue FROM payments WHERE DATE_FORMAT(payment_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')");
+                $stmt->execute();
+                $stats['monthly_revenue'] = $stmt->fetch(PDO::FETCH_ASSOC)['revenue'];
+            } catch (PDOException $e) {
+                $stats['monthly_revenue'] = 0;
+            }
 
-            // Sessions Today (assuming sessions table exists)
-            $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM sessions WHERE DATE(session_date) = CURDATE()");
-            $stmt->execute();
-            $stats['sessions_today'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            // Sessions Today - check if sessions table exists
+            try {
+                $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM sessions WHERE DATE(session_date) = CURDATE()");
+                $stmt->execute();
+                $stats['sessions_today'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            } catch (PDOException $e) {
+                $stats['sessions_today'] = 0;
+            }
 
             return $stats;
         } catch (PDOException $e) {

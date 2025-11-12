@@ -140,8 +140,14 @@ class WorkoutController {
         $name = $_POST['name'] ?? ('Workout ' . date('Y-m-d'));
         $notes = $_POST['notes'] ?? '';
         
-        // Prevent starting if there is an in-progress workout (no end_time)
-        $check = $this->db->query("SELECT workout_id FROM workouts WHERE end_time IS NULL LIMIT 1");
+        // Prevent starting if there is an in-progress workout (no end_time) for THIS user only
+        $check = $this->db->prepare("SELECT w.workout_id
+                                      FROM workouts w
+                                      JOIN workout_routines wr ON w.routine_id = wr.routine_id
+                                      WHERE wr.user_id = :uid AND w.end_time IS NULL
+                                      LIMIT 1");
+        $check->bindParam(':uid', $user_id, PDO::PARAM_INT);
+        $check->execute();
         if ($check && $check->fetch(PDO::FETCH_ASSOC)) {
             return ['success' => false, 'message' => 'You already have an in-progress workout. Please end it before starting a new one.'];
         }
@@ -198,7 +204,20 @@ class WorkoutController {
             }
 
             // Insert logs per set if available; fallback to per exercise
-            $member_id = isset($_SESSION['member_id']) ? (int)$_SESSION['member_id'] : (int)($_SESSION['user_id'] ?? 0);
+            // Resolve member_id reliably from members table using session user_id
+            $member_id = 0;
+            $uid = (int)($_SESSION['user_id'] ?? 0);
+            if ($uid > 0) {
+                $mq = $this->db->prepare("SELECT member_id FROM members WHERE user_id = :uid LIMIT 1");
+                $mq->bindParam(':uid', $uid, PDO::PARAM_INT);
+                if ($mq->execute()) {
+                    $mrow = $mq->fetch(PDO::FETCH_ASSOC);
+                    if ($mrow && isset($mrow['member_id'])) { $member_id = (int)$mrow['member_id']; }
+                }
+            }
+            if ($member_id <= 0) {
+                return ['success' => false, 'message' => 'Member profile not found for logging.'];
+            }
             // Try per-set
             $perSet = $this->db->prepare("INSERT INTO workout_logs (member_id, workout_id, exercise_id, sets, reps, weight, duration, log_date)
                 SELECT :member_id, we.workout_id, we.exercise_id, 1, wes.reps, wes.weight, :duration, CURDATE()
@@ -525,8 +544,14 @@ class WorkoutController {
 
     // Create a workout from a routine and seed exercises
     private function startWorkoutFromRoutine($user_id, $routine_id) {
-        // Prevent starting if there is an in-progress workout (no end_time)
-        $check = $this->db->query("SELECT workout_id FROM workouts WHERE end_time IS NULL LIMIT 1");
+        // Prevent starting if there is an in-progress workout (no end_time) for THIS user only
+        $check = $this->db->prepare("SELECT w.workout_id
+                                      FROM workouts w
+                                      JOIN workout_routines wr ON w.routine_id = wr.routine_id
+                                      WHERE wr.user_id = :uid AND w.end_time IS NULL
+                                      LIMIT 1");
+        $check->bindParam(':uid', $user_id, PDO::PARAM_INT);
+        $check->execute();
         if ($check && $check->fetch(PDO::FETCH_ASSOC)) {
             return ['success' => false, 'message' => 'You already have an in-progress workout. Please end it before starting a new one.'];
         }

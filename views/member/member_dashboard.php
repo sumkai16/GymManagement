@@ -8,6 +8,7 @@ require_once '../../models/Member.php';
 $member = new Member();
 $member_name = $member->getMemberInfo($_SESSION['user_id']);
 $data = $member->getDashboardData($_SESSION['user_id']);
+$completedToday = $member->hasWorkoutCompletedToday($_SESSION['user_id']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,7 +92,11 @@ $data = $member->getDashboardData($_SESSION['user_id']);
                             </div>
                         </div>
                         <div class="workout-status">
-                            <span class="status-completed">Completed</span>
+                            <?php if (!empty($completedToday)): ?>
+                                <span class="status-completed">Completed</span>
+                            <?php else: ?>
+                                <span class="status-in-progress">Pending</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -100,7 +105,10 @@ $data = $member->getDashboardData($_SESSION['user_id']);
                 <div class="dashboard-section">
                     <div class="section-header">
                         <h2>Nutrition Today</h2>
-                        <a href="nutrition-food.php" class="view-all">View All</a>
+                        <div class="section-links">
+                            <a href="nutrition-food.php" class="view-all">Food</a>
+                            <a href="nutrition-supplement.php" class="view-all">Supplements</a>
+                        </div>
                     </div>
                     <div class="nutrition-card">
                         <div class="calorie-progress">

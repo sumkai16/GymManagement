@@ -34,28 +34,65 @@ if (isset($_SESSION['user_id'])) {
         
         <?php include __DIR__ . '/../utilities/alert.php'; ?>
         
-        <?php if (!empty($_SESSION['flash'])): ?>
-            <div class="flash"><?=$_SESSION['flash']?></div>
-            <?php unset($_SESSION['flash']); ?>
-        <?php endif; ?>
+        <div class="auth-form-content">
+            <?php if (!empty($_SESSION['flash'])): ?>
+                <div class="flash"><?=$_SESSION['flash']?></div>
+                <?php unset($_SESSION['flash']); ?>
+            <?php endif; ?>
 
-        <form method="POST" action="../../controllers/AuthController.php">
-            <input type="hidden" name="action" value="register">
-            
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Password" required>
-            </div>
-            
-            <button type="submit" class="submit-btn">
-                CREATE ACCOUNT
-            </button>
-        </form>
+            <form method="POST" action="../../controllers/AuthController.php">
+                <input type="hidden" name="action" value="register">
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" placeholder="First name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" placeholder="Last name" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" placeholder="Enter your address" rows="3"></textarea>
+                </div>
+                
+                <!-- <div class="form-group">
+                    <label for="membership_type">Membership Type</label>
+                    <select id="membership_type" name="membership_type" required>
+                        <option value="">Select membership type</option>
+                        <option value="monthly">Monthly - ₱999/month</option>
+                        <option value="annual">Annual - ₱9,999/year (Save 17%)</option>
+                    </select>
+                </div> -->
+                
+                <button type="submit" class="submit-btn">
+                    CREATE ACCOUNT
+                </button>
+            </form>
+        </div>
         
         <div class="auth-links">
             <p>Already have an account? <a href="login.php">Sign in here</a></p>

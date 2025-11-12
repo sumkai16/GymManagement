@@ -171,9 +171,17 @@ body::before {
     border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 40px;
     width: 100%;
-    max-width: 450px;
+    max-width: 550px;
     position: relative;
     overflow: hidden;
+}
+
+/* Scrollable form content */
+.auth-form-content {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-right: -10px;
 }
 
 .auth-container::before {
@@ -246,7 +254,9 @@ body::before {
     letter-spacing: 1px;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea,
+.form-group select {
     width: 100%;
     padding: 15px 20px;
     border: 2px solid #e2e8f0;
@@ -258,7 +268,25 @@ body::before {
     position: relative;
 }
 
-.form-group input:focus {
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+    padding-right: 50px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: #3b82f6;
     background: #ffffff;
@@ -266,12 +294,14 @@ body::before {
     transform: translateY(-2px);
 }
 
-.form-group input::placeholder {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
     color: #a0aec0;
     font-size: 0.9rem;
 }
 
-.form-group input:focus::placeholder {
+.form-group input:focus::placeholder,
+.form-group textarea:focus::placeholder {
     color: #718096;
 }
 
@@ -385,18 +415,32 @@ body::before {
     .auth-container {
         padding: 30px 20px;
         margin: 10px;
+        max-height: 85vh;
+        border-radius: 20px;
     }
     
     .logo-section h1 {
         font-size: 2rem;
     }
     
-    .form-group input {
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
         padding: 12px 15px;
+    }
+    
+    .form-group select {
+        padding-right: 45px;
+        background-size: 18px;
     }
     
     .submit-btn {
         padding: 12px;
+    }
+    
+    /* Smaller scrollbar for mobile */
+    .auth-form-content::-webkit-scrollbar {
+        width: 6px;
     }
 }
 
@@ -472,23 +516,30 @@ body::before {
     transition: width 0.3s ease;
 }
 
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
+/* Custom scrollbar for form content */
+.auth-form-content::-webkit-scrollbar {
     width: 8px;
 }
 
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
+.auth-form-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+.auth-form-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
     border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+.auth-form-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+/* Firefox scrollbar */
+.auth-form-content {
+    scrollbar-width: thin;
+    scrollbar-color: #3b82f6 rgba(255, 255, 255, 0.1);
 }
 
 /* Dynamic diagonal lines effect */

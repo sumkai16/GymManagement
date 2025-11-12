@@ -11,13 +11,24 @@ $username = $_SESSION['username'] ?? 'Admin';
 require_once '../../controllers/AdminController.php';
 require_once '../../models/Member.php';
 require_once '../../models/Trainer.php';
-$memberModel = new Member();
-$trainerModel = new Trainer();
-$totalMembers = count($memberModel->getAllMembers());
-$activeTrainers = count($trainerModel->getAllTrainers());
 
-$adminController = new AdminController();
-$stats = $adminController->getDashboardStats();
+try {
+    $memberModel = new Member();
+    $trainerModel = new Trainer();
+    $totalMembers = count($memberModel->getAllMembers());
+    $activeTrainers = count($trainerModel->getAllTrainers());
+
+    $adminController = new AdminController();
+    $stats = $adminController->getDashboardStats();
+} catch (Exception $e) {
+    error_log('Admin dashboard error: ' . $e->getMessage());
+    $totalMembers = 0;
+    $activeTrainers = 0;
+    $stats = [
+        'monthly_revenue' => 0,
+        'sessions_today' => 0
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +42,11 @@ $stats = $adminController->getDashboardStats();
 </head>
 <body>
     <!-- Include Alert System -->
-    <?php include '../utilities/alert.php'; ?>
+    <?php 
+    if (file_exists('../utilities/alert.php')) {
+        include '../utilities/alert.php';
+    }
+    ?>
     
     <!-- Include Dynamic Sidebar -->
     <?php include '../components/dynamic_sidebar.php'; ?>

@@ -1,13 +1,7 @@
 /* Nutrition Styles - Modern Blue Design */
 
-/* Modern Blue Background with Glassmorphism */
+/* Flat background (inherits from site theme) */
 body {
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(147, 197, 253, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(219, 234, 254, 0.3) 0%, transparent 70%),
-        linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-    background-attachment: fixed;
     min-height: 100vh;
 }
 
@@ -20,36 +14,21 @@ body {
 }
 
 .nutrition-section {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 2rem;
-    box-shadow: 
-        0 8px 32px rgba(59, 130, 246, 0.1),
-        0 2px 16px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--sidebar-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+    border: 1px solid #e5e7eb;
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.nutrition-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%);
-    border-radius: 24px 24px 0 0;
-}
+.nutrition-section::before { display:none; }
 
 .nutrition-section:hover {
-    transform: translateY(-5px);
-    box-shadow: 
-        0 20px 40px rgba(102, 126, 234, 0.15),
-        0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.10);
 }
 
 .nutrition-section h3 {
@@ -69,12 +48,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 2px solid transparent;
-    border-radius: 12px;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     margin-bottom: 0.75rem;
-    transition: all 0.3s ease;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
     position: relative;
     overflow: hidden;
 }
@@ -86,14 +65,15 @@ body {
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    transition: all 0.3s ease;
+    background: var(--primary-color);
+    opacity: .8;
+    transition: width .2s ease;
 }
 
 .meal-item:hover {
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-    transform: translateY(-3px);
-    border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    transform: translateY(-1px);
+    border-color: #d1d5db;
 }
 
 .meal-item:hover::before {
@@ -113,7 +93,7 @@ body {
 }
 
 .meal-time .meal-type {
-    color: #667eea;
+    color: var(--primary-color);
     font-size: 0.9rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -136,14 +116,14 @@ body {
 
 /* Calorie Tracker */
 .calorie-tracker {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
-    padding: 2rem;
-    border-radius: 16px;
+    padding: 1.5rem;
+    border-radius: 14px;
     text-align: center;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 18px rgba(0,0,0,.12);
 }
 
 .calorie-tracker::before {
@@ -190,31 +170,22 @@ body {
 }
 
 .macro-card {
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-    padding: 1.5rem;
+    background: #fff;
+    padding: 1rem 1.25rem;
     border-radius: 12px;
     text-align: center;
-    border: 2px solid rgba(102, 126, 234, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+    transition: transform .2s ease, box-shadow .2s ease;
     position: relative;
     overflow: hidden;
 }
 
-.macro-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 12px 12px 0 0;
-}
+.macro-card::before { display:none; }
 
 .macro-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-    border-color: rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.10);
+    border-color: #d1d5db;
 }
 
 .macro-card h4 {
@@ -254,19 +225,19 @@ body {
 .form-group textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid rgba(102, 126, 234, 0.1);
+    border: 1px solid #e5e7eb;
     border-radius: 10px;
     font-size: 1rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    transition: all 0.3s ease;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(33, 185, 197, 0.12);
 }
 
 .form-group textarea {
@@ -315,9 +286,9 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-color);
     color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
 }
 
 .btn-primary:hover {
@@ -350,11 +321,11 @@ body {
 /* No Data State */
 .no-data {
     text-align: center;
-    padding: 3rem 2rem;
-    color: #64748b;
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-    border-radius: 16px;
-    border: 2px dashed rgba(102, 126, 234, 0.3);
+    padding: 2rem 1.5rem;
+    color: #6b7280;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px dashed #d1d5db;
     position: relative;
     overflow: hidden;
 }
@@ -409,4 +380,332 @@ body {
     .macro-cards {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* Nutrition page-specific overrides for stat cards */
+.nutrition-section .quick-stats .stat-card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+.nutrition-section .quick-stats .stat-card .stat-icon {
+    background: rgba(0,0,0,.06);
+    color: #111827;
+}
+.nutrition-section .quick-stats .stat-card .stat-content h3 {
+    color: #1f2937;
+}
+.nutrition-section .quick-stats .stat-card .stat-content p {
+    color: #6b7280;
+}
+
+/* Creative Nutrition Page Styles */
+.page-nutrition {
+    background: linear-gradient(135deg, #fefefe 0%, #f0f9ff 100%);
+    min-height: 100vh;
+}
+.page-nutrition .main-content {
+    background: transparent;
+}
+.nutrition-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.nutrition-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+.nutrition-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+.nutrition-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    border: 1px solid #e5e7eb;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.nutrition-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+}
+.nutrition-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0ea5e9 0%, #0284c7 100%);
+}
+.nutrition-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+}
+.nutrition-card h3 i {
+    color: #0ea5e9;
+}
+/* Quick Add Form */
+.quick-add-form {
+    display: grid;
+    grid-template-columns: 2fr repeat(4, 1fr) 1fr auto;
+    gap: 1rem;
+    align-items: end;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+.quick-add-form::-webkit-scrollbar {
+    width: 6px;
+}
+.quick-add-form::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.quick-add-form::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.quick-add-form::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+.quick-add-form .form-field {
+    display: flex;
+    flex-direction: column;
+}
+.quick-add-form .form-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+.quick-add-form .form-field input {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.quick-add-form .form-field input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+.quick-add-form .btn-add {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.quick-add-form .btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+}
+/* Totals */
+.totals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+.total-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+.total-card:hover {
+    transform: translateY(-2px);
+}
+.total-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 70%);
+}
+.total-card .icon {
+    font-size: 2.5rem;
+    color: #0ea5e9;
+    margin-bottom: 0.75rem;
+}
+.total-card .value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+}
+.total-card .label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+/* Meals List */
+.meals-list {
+    margin-top: 0;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+.meals-list::-webkit-scrollbar {
+    width: 6px;
+}
+.meals-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.meals-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.meals-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+.meal-row {
+    display: grid;
+    grid-template-columns: 2fr repeat(4, 1fr) 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.meal-row:hover {
+    background: #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.meal-row .food-name {
+    font-weight: 700;
+    color: #1e293b;
+}
+.meal-row .macro {
+    font-size: 0.95rem;
+    color: #475569;
+}
+.meal-row .macro span {
+    font-weight: 600;
+    color: #0f172a;
+}
+.meal-row .date {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+.meal-row .btn-delete {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.meal-row .btn-delete:hover {
+    background: #dc2626;
+}
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #94a3b8;
+}
+.empty-state i {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+.empty-state p {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+@media (max-width: 1200px) {
+    .quick-add-form,
+    .meal-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    .quick-add-form .form-field input,
+    .meal-row .macro,
+    .meal-row .date {
+        width: 100%;
+    }
+}
+
+/* Supplement page scrollbar styles */
+.supplement-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+.supplement-list::-webkit-scrollbar {
+    width: 6px;
+}
+.supplement-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.supplement-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.supplement-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.schedule-grid {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+.schedule-grid::-webkit-scrollbar {
+    width: 6px;
+}
+.schedule-grid::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.schedule-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.schedule-grid::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

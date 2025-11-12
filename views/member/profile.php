@@ -6,16 +6,89 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
 }
 
 // Instead of static sample data, fetch from DB
+require_once '../../config/database.php';
 require_once '../../models/Member.php';
 require_once '../../controllers/BookingController.php';
-$memberModel = new Member();
-$bookingController = new BookingController();
-// Get user id from session
-$user_id = $_SESSION['user_id'];
-// Get member's row using user_id
-$user = $memberModel->getMemberByUserId($user_id); // New method we will add
-if (!$user) {
-    die('Member profile not found.');
+
+try {
+    $memberModel = new Member();
+    $bookingController = new BookingController();
+    // Get user id from session
+    $user_id = $_SESSION['user_id'];
+    
+    // Debug: Check if user_id exists
+    if (!$user_id) {
+        die('User ID not found in session.');
+    }
+    
+    // Get member's row using user_id
+    $user = $memberModel->getMemberByUserId($user_id);
+    
+    // If no member record exists, create one from user data
+    if (!$user) {
+        require_once '../../models/User.php';
+        $database = new Database();
+        $userModel = new User($database->getConnection());
+        $userData = $userModel->getUserById($user_id);
+        
+        if ($userData) {
+            // Debug: Log user data
+            error_log("User data found: " . print_r($userData, true));
+            
+            // Ensure we have valid data for required fields
+            $fullName = trim(!empty($userData['username']) ? $userData['username'] : 'Member ' . $user_id);
+            $email = trim(!empty($userData['email']) ? $userData['email'] : 'member' . $user_id . '@gmail.com');
+            $phone = '09123456789'; // Default phone
+            $address = 'Address to be updated'; // Default address
+            $membershipType = 'monthly';
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d', strtotime('+1 month'));
+            $status = 'active';
+            
+            // Debug: Check each field
+            error_log("Creating member with - Full Name: '$fullName', Email: '$email', Phone: '$phone', Start: '$startDate', End: '$endDate'");
+            error_log("Field emptiness checks - fullName empty: " . (empty($fullName) ? 'true' : 'false') . 
+                     ", email empty: " . (empty($email) ? 'true' : 'false') . 
+                     ", membershipType empty: " . (empty($membershipType) ? 'true' : 'false') . 
+                     ", startDate empty: " . (empty($startDate) ? 'true' : 'false') . 
+                     ", endDate empty: " . (empty($endDate) ? 'true' : 'false'));
+            
+            // Create member record using addMember method
+            $result = $memberModel->addMember(
+                $user_id, 
+                null, // username (not needed for existing user)
+                null, // password (not needed for existing user)
+                $fullName, // full_name
+                $email, // email
+                $phone, // phone
+                $address, // address
+                $membershipType, // membership_type
+                $startDate, // start_date
+                $endDate, // end_date
+                $status // status
+            );
+            
+            error_log("Add member result: " . print_r($result, true));
+            
+            if ($result['success']) {
+                // Try to get the newly created member record
+                $user = $memberModel->getMemberByUserId($user_id);
+                if (!$user) {
+                    error_log("Failed to retrieve newly created member for user_id: $user_id");
+                    die('Member profile creation failed. Please contact support.');
+                }
+            } else {
+                error_log("Failed to create member record for user_id: $user_id - " . $result['message']);
+                die('Failed to create member profile: ' . $result['message']);
+            }
+        } else {
+            error_log("User data not found for user_id: $user_id");
+            die('User account not found. Please log in again.');
+        }
+    }
+} catch (Exception $e) {
+    error_log('Profile page error: ' . $e->getMessage());
+    die('An error occurred while loading your profile. Please try again later.');
 }
 
 $updateResult = null; // For modal feedback

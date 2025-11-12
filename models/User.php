@@ -8,19 +8,23 @@ class User {
         $this->conn = $db;
     }
 
-    public function register($username, $password, $role = "guest", $status = "inactive") {
+    public function register($username, $password, $email, $first_name, $last_name, $address,  $role = "guest", $status = "inactive") {
         try {
             // Check if username already exists
             if ($this->userExists($username)) {
                 return false;
             }
             
-            $query = "INSERT INTO " . $this->table . " (username, password, role, status) VALUES (:username, :password, :role, :status)";
+            $query = "INSERT INTO " . $this->table . " (username, password, email, first_name, last_name, address, role, status) VALUES (:username, :password, :email, :first_name, :last_name, :address, :role, :status)";
             $stmt = $this->conn->prepare($query);
 
             $hash = password_hash($password, PASSWORD_BCRYPT);
             $stmt->bindParam(":username", $username);
             $stmt->bindParam(":password", $hash);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":first_name", $first_name);
+            $stmt->bindParam(":last_name", $last_name);
+            $stmt->bindParam(":address", $address);
             $stmt->bindParam(":role", $role);
             $stmt->bindParam(":status", $status);
             

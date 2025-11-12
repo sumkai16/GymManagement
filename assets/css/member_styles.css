@@ -10,13 +10,30 @@ ul, li {
 }
 
 :root {
-    --primary-color: #21b9c5;
-    --body-color: #d2d2d3;
+    --primary-color: #0ea5e9;
+    --primary-dark: #0284c7;
+    --primary-light: #38bdf8;
+    --secondary-color: #64748b;
+    --accent-color: #ef4444;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    
+    --body-color: #f8fafc;
     --sidebar-color: #ffffff;
-    --text-color: rgb(78, 78, 78);
-    --accent: #1c1c1c;
+    --card-background: #ffffff;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    
+    --background-gradient: linear-gradient(135deg, #fefefe 0%, #f0f9ff 100%);
+    --card-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    --card-shadow-hover: 0 20px 60px rgba(0,0,0,0.08);
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+    
     --font-family: 'Poppins', sans-serif;
-
     --tran-02: all 0.2s ease;
     --tran-03: all 0.3s ease;
     --tran-04: all 0.4s ease;
@@ -25,9 +42,64 @@ ul, li {
 
 body {
     height: 100vh;
-    background: var(--body-color);
+    background: var(--background-gradient);
     margin: 0;
     padding: 0;
+    color: var(--text-color);
+}
+
+/* Standardized Card Styles */
+.card {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    transition: var(--tran-03);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+/* Enhanced Card for Nutrition Pages */
+.nutrition-card {
+    background: var(--card-background);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--tran-03);
+}
+
+.nutrition-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.nutrition-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
 }
 
 /* Main Content Area */
@@ -546,44 +618,56 @@ header.top-navbar .nav-right .profile .dropdown a:hover {
 }
 
 .stat-card {
-    background: var(--sidebar-color);
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    background: var(--primary-color);
+    padding: 22px 20px;
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,.12);
     display: flex;
     align-items: center;
-    gap: 20px;
-    transition: var(--tran-03);
+    gap: 16px;
+    transition: transform .2s ease, box-shadow .2s ease;
+    overflow: hidden;
 }
 
 .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.16);
 }
 
+/* remove decorative glow */
+.stat-card::after { display: none; }
+
 .stat-icon {
-    width: 60px;
-    height: 60px;
-    background: var(--primary-color);
-    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,.18);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    color: var(--sidebar-color);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
 }
 
 .stat-content h3 {
-    font-size: 2rem;
-    color: var(--accent);
+    font-size: 1.9rem;
+    line-height: 1;
+    color: #ffffff;
     margin: 0;
     font-weight: 700;
+    letter-spacing: -.01em;
 }
 
 .stat-content p {
-    color: var(--text-color);
-    margin: 5px 0 0 0;
-    font-size: 0.9rem;
+    color: rgba(255,255,255,.92);
+    margin: 6px 0 0 0;
+    font-size: 0.92rem;
+    text-transform: none;
+    letter-spacing: .02em;
+    font-weight: 500;
 }
 
 /* Dashboard Grid */
@@ -1667,8 +1751,14 @@ header.top-navbar .nav-right .profile .dropdown a:hover {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+    /* Show mobile menu toggle */
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
     .sidebar {
         transform: translateX(-100%);
+        z-index: 1000;
     }
     
     .sidebar.mobile-open {
@@ -1691,6 +1781,475 @@ header.top-navbar .nav-right .profile .dropdown a:hover {
     .sidebar.close .dropdown-arrow {
         display: block;
     }
+    
+    /* Main content adjustments */
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .content-wrapper {
+        padding: 20px 10px;
+    }
+    
+    /* Dashboard header */
+    .dashboard-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .dashboard-header p {
+        font-size: 0.9rem;
+    }
+    
+    /* Cards and grid layouts */
+    .card {
+        margin-bottom: 20px;
+        border-radius: 12px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .two-column {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .three-column {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Tables */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 600px;
+        font-size: 0.85rem;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+    }
+    
+    /* Forms */
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-row .form-group {
+        margin-bottom: 20px;
+    }
+    
+    input, select, textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+    
+    /* Profile container */
+    .profile-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .profile-sidebar {
+        width: 100%;
+        order: 2;
+    }
+    
+    .profile-content {
+        width: 100%;
+        order: 1;
+    }
+    
+    /* Modal adjustments */
+    .modal {
+        width: 95%;
+        margin: 10px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-footer {
+        padding: 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+    
+    /* Alert messages */
+    .alert {
+        margin: 10px;
+        padding: 15px;
+        font-size: 0.9rem;
+    }
+    
+    /* Navigation */
+    .nav-tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .nav-tab {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        padding: 10px 5px;
+        font-size: 0.85rem;
+    }
+    
+    /* Workout cards */
+    .workout-card {
+        margin-bottom: 15px;
+    }
+    
+    .workout-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Coach cards */
+    .coach-card {
+        margin-bottom: 20px;
+    }
+    
+    .coach-info h3 {
+        font-size: 1.2rem;
+    }
+    
+    .coach-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    /* Booking forms */
+    .booking-form {
+        padding: 20px;
+    }
+    
+    .booking-form .form-row {
+        flex-direction: column;
+    }
+    
+    /* Nutrition tracking */
+    .nutrition-summary {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nutrition-card {
+        width: 100%;
+    }
+    
+    /* Exercise lists */
+    .exercise-item {
+        padding: 15px;
+    }
+    
+    .exercise-info h4 {
+        font-size: 1rem;
+    }
+    
+    /* Footer adjustments */
+    .footer {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    /* Charts and graphs */
+    .chart-container {
+        height: 300px;
+        margin: 20px 0;
+    }
+    
+    /* Loading states */
+    .loading {
+        padding: 40px 20px;
+    }
+    
+    /* Empty states */
+    .empty-state {
+        padding: 40px 20px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.2rem;
+    }
+    
+    .empty-state p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 15px;
+    }
+    
+    .content-wrapper {
+        padding: 15px 5px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .modal {
+        width: 98%;
+        margin: 5px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .modal-footer {
+        padding: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    input, select, textarea {
+        padding: 10px;
+    }
+    
+    .table-container {
+        margin: 0 -10px;
+        padding: 0 10px;
+    }
+    
+    th, td {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+    
+    .coach-card {
+        padding: 15px;
+    }
+    
+    .workout-card {
+        padding: 15px;
+    }
+    
+    .profile-header {
+        padding: 20px;
+    }
+    
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .profile-name {
+        font-size: 1.3rem;
+    }
+    
+    .nav-tab {
+        min-width: 100px;
+        padding: 8px 4px;
+        font-size: 0.8rem;
+    }
+    
+    .stats-grid .stat-item {
+        padding: 15px;
+    }
+    
+    .stats-grid .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stats-grid .stat-label {
+        font-size: 0.8rem;
+    }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .modal {
+        max-height: 95vh;
+    }
+    
+    .profile-container {
+        flex-direction: row;
+    }
+    
+    .profile-sidebar {
+        width: 300px;
+        order: 1;
+    }
+    
+    .profile-content {
+        width: calc(100% - 320px);
+        order: 2;
+    }
+    
+    .dashboard-header {
+        margin-bottom: 20px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet devices */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .main-content {
+        margin-left: 80px;
+        padding: 30px;
+    }
+    
+    .sidebar.close {
+        width: 80px;
+    }
+    
+    .sidebar.close .text {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .sidebar.close .menu-section {
+        display: none;
+    }
+    
+    .sidebar.close .dropdown-arrow {
+        display: none;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .three-column {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .coach-card {
+        margin-bottom: 25px;
+    }
+    
+    .profile-container {
+        gap: 30px;
+    }
+    
+    .profile-sidebar {
+        width: 300px;
+    }
+    
+    .profile-content {
+        width: calc(100% - 330px);
+    }
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: var(--tran-03);
+}
+
+.mobile-menu-toggle:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-menu-toggle i {
+    font-size: 1.5rem;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Body class when sidebar is open on mobile */
+body.sidebar-open {
+    overflow: hidden;
 }
 
 /* --- End Sidebar Design Refresh --- */

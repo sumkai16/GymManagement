@@ -32,6 +32,9 @@ class Member {
         // Nutrition today
         $data['nutrition_today'] = $this->getNutritionToday($user_id);
 
+        // Supplements today
+        $data['supplements_today'] = $this->getSupplementsToday($user_id);
+
         // Weekly progress
         $data['weekly_progress'] = $this->getWeeklyProgress($user_id);
 
@@ -54,7 +57,11 @@ class Member {
     }
 
     private function getWorkoutsThisWeek($user_id) {
-        $query = "SELECT COUNT(DISTINCT log_date) as count FROM workout_logs WHERE member_id = (SELECT member_id FROM members WHERE user_id = :user_id) AND YEARWEEK(log_date, 1) = YEARWEEK(CURDATE(), 1)";
+        $query = "SELECT COUNT(DISTINCT wl.log_date) as count
+                  FROM workout_logs wl
+                  WHERE wl.member_id = (SELECT member_id FROM members WHERE user_id = :user_id)
+                  AND YEARWEEK(wl.log_date, 1) = YEARWEEK(CURDATE(), 1)
+                  AND wl.log_date >= COALESCE((SELECT start_date FROM members WHERE user_id = :user_id), '1970-01-01')";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
@@ -72,7 +79,12 @@ class Member {
     }
 
     private function getLastWorkout($user_id) {
-        $query = "SELECT log_date FROM workout_logs WHERE member_id = (SELECT member_id FROM members WHERE user_id = :user_id) ORDER BY log_date DESC LIMIT 1";
+        // Primary: based on workout_logs
+        $query = "SELECT wl.log_date
+                  FROM workout_logs wl
+                  WHERE wl.member_id = (SELECT member_id FROM members WHERE user_id = :user_id)
+                  AND wl.log_date >= COALESCE((SELECT start_date FROM members WHERE user_id = :user_id), '1970-01-01')
+                  ORDER BY wl.log_date DESC LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
@@ -84,6 +96,27 @@ class Member {
             if ($diff->days == 0) return 'Today';
             elseif ($diff->days == 1) return 'Yesterday';
             else return $diff->days . ' days ago';
+        }
+        // Fallback: based on workouts.end_time for this user
+        try {
+            $wq = $this->conn->prepare("SELECT DATE(w.end_time) as d
+                                        FROM workouts w
+                                        JOIN workout_routines wr ON w.routine_id = wr.routine_id
+                                        WHERE wr.user_id = :user_id AND w.end_time IS NOT NULL
+                                        ORDER BY w.end_time DESC LIMIT 1");
+            $wq->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $wq->execute();
+            $wrow = $wq->fetch(PDO::FETCH_ASSOC);
+            if ($wrow && !empty($wrow['d'])) {
+                $date = new DateTime($wrow['d']);
+                $now = new DateTime();
+                $diff = $now->diff($date);
+                if ($diff->days == 0) return 'Today';
+                elseif ($diff->days == 1) return 'Yesterday';
+                else return $diff->days . ' days ago';
+            }
+        } catch (PDOException $e) {
+            // ignore fallback errors
         }
         return 'No recent workout';
     }
@@ -112,6 +145,18 @@ class Member {
         ];
     }
 
+    private function getSupplementsToday($user_id) {
+        $query = "SELECT COUNT(*) as count, GROUP_CONCAT(supplement_name SEPARATOR ', ') as names FROM supplement_logs WHERE user_id = :user_id AND date = CURDATE() ORDER BY time_taken ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return [
+            'count' => $result['count'] ?? 0,
+            'names' => $result['names'] ?? ''
+        ];
+    }
+
     private function getWeeklyProgress($user_id) {
         // Workouts: count distinct days this week
         $workouts = $this->getWorkoutsThisWeek($user_id);
@@ -135,8 +180,12 @@ class Member {
         // Latest 3 activities: workouts and nutrition
         $activities = [];
 
-        // Latest workout
-        $query = "SELECT 'workout' as type, log_date as date FROM workout_logs WHERE member_id = (SELECT member_id FROM members WHERE user_id = :user_id) ORDER BY log_date DESC LIMIT 1";
+        // Latest workout (do not show logs before member's start_date)
+        $query = "SELECT 'workout' as type, wl.log_date as date
+                  FROM workout_logs wl
+                  WHERE wl.member_id = (SELECT member_id FROM members WHERE user_id = :user_id)
+                  AND wl.log_date >= COALESCE((SELECT start_date FROM members WHERE user_id = :user_id), '1970-01-01')
+                  ORDER BY wl.log_date DESC LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
@@ -155,9 +204,10 @@ class Member {
             $activities[] = ['type' => 'nutrition', 'description' => 'Logged Meal', 'time' => $this->timeAgo($nutrition['date'])];
         }
 
-        // Placeholder for PR
-        $activities[] = ['type' => 'pr', 'description' => 'New Personal Record', 'time' => 'Yesterday'];
-
+        // If no real activity, return empty list
+        if (empty($activities)) {
+            return [];
+        }
         return array_slice($activities, 0, 3);
     }
 
@@ -168,6 +218,24 @@ class Member {
         if ($interval->days == 0) return 'Today';
         elseif ($interval->days == 1) return 'Yesterday';
         else return $interval->days . ' days ago';
+    }
+
+    // Check if the logged-in user has any workout completed today
+    public function hasWorkoutCompletedToday($user_id) {
+        try {
+            $query = "SELECT 1
+                      FROM workouts w
+                      JOIN workout_routines wr ON w.routine_id = wr.routine_id
+                      WHERE wr.user_id = :user_id AND DATE(w.end_time) = CURDATE()
+                      LIMIT 1";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $user_id);
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('hasWorkoutCompletedToday error: ' . $e->getMessage());
+            return false;
+        }
     }
 
     // Admin methods

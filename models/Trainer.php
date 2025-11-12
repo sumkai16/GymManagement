@@ -311,5 +311,156 @@ class Trainer {
             return [];
         }
     }
+
+    // Get trainer by user ID
+    public function getTrainerByUserId($user_id) {
+        try {
+            $stmt = $this->conn->prepare("SELECT * FROM trainers WHERE user_id = :user_id");
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get trainer by user ID error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Get trainer's clients (members)
+    public function getTrainerClients($trainer_id) {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT m.member_id, m.full_name, m.email, m.phone, m.membership_type, m.start_date, m.end_date, m.status
+                FROM members m
+                WHERE m.member_id IN (
+                    SELECT DISTINCT tb.member_id 
+                    FROM trainer_bookings tb 
+                    WHERE tb.trainer_id = :trainer_id
+                )
+                ORDER BY m.full_name
+            ");
+            $stmt->bindParam(':trainer_id', $trainer_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get trainer clients error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Get client workout history
+    public function getClientWorkoutHistory($member_id, $limit = 50, $offset = 0) {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    wl.log_id,
+                    wl.log_date,
+                    wl.sets,
+                    wl.reps,
+                    wl.weight,
+                    wl.duration,
+                    e.name as exercise_name,
+                    e.muscle_group,
+                    e.equipment,
+                    w.workout_name,
+                    w.created_at as workout_date
+                FROM workout_logs wl
+                LEFT JOIN exercises e ON wl.exercise_id = e.exercise_id
+                LEFT JOIN workouts w ON wl.workout_id = w.workout_id
+                WHERE wl.member_id = :member_id
+                ORDER BY wl.log_date DESC, w.created_at DESC
+                LIMIT :limit OFFSET :offset
+            ");
+            $stmt->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get client workout history error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Get client workout statistics
+    public function getClientWorkoutStats($member_id, $days = 30) {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    COUNT(DISTINCT wl.log_date) as workout_days,
+                    COUNT(wl.log_id) as total_exercises,
+                    SUM(wl.sets) as total_sets,
+                    SUM(wl.reps) as total_reps,
+                    MAX(wl.weight) as max_weight,
+                    AVG(wl.weight) as avg_weight,
+                    SUM(wl.duration) as total_duration
+                FROM workout_logs wl
+                WHERE wl.member_id = :member_id 
+                AND wl.log_date >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+            ");
+            $stmt->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+            $stmt->bindParam(':days', $days, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get client workout stats error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Get client workout history by date range
+    public function getClientWorkoutHistoryByDateRange($member_id, $start_date, $end_date) {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    wl.log_date,
+                    COUNT(wl.log_id) as exercises_completed,
+                    SUM(wl.sets) as total_sets,
+                    SUM(wl.reps) as total_reps,
+                    SUM(wl.duration) as total_duration,
+                    GROUP_CONCAT(DISTINCT e.name ORDER BY e.name) as exercises
+                FROM workout_logs wl
+                LEFT JOIN exercises e ON wl.exercise_id = e.exercise_id
+                WHERE wl.member_id = :member_id
+                AND wl.log_date BETWEEN :start_date AND :end_date
+                GROUP BY wl.log_date
+                ORDER BY wl.log_date DESC
+            ");
+            $stmt->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+            $stmt->bindParam(':start_date', $start_date);
+            $stmt->bindParam(':end_date', $end_date);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get client workout history by date range error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Get client muscle group breakdown
+    public function getClientMuscleGroupBreakdown($member_id, $days = 30) {
+        try {
+            $stmt = $this->conn->prepare("
+                SELECT 
+                    e.muscle_group,
+                    COUNT(wl.log_id) as exercise_count,
+                    SUM(wl.sets) as total_sets,
+                    SUM(wl.reps) as total_reps,
+                    MAX(wl.weight) as max_weight
+                FROM workout_logs wl
+                LEFT JOIN exercises e ON wl.exercise_id = e.exercise_id
+                WHERE wl.member_id = :member_id 
+                AND wl.log_date >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+                GROUP BY e.muscle_group
+                ORDER BY exercise_count DESC
+            ");
+            $stmt->bindParam(':member_id', $member_id, PDO::PARAM_INT);
+            $stmt->bindParam(':days', $days, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get client muscle group breakdown error: " . $e->getMessage());
+            return [];
+        }
+    }
 }
 ?>

@@ -6,6 +6,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
 }
 
 $username = $_SESSION['username'] ?? 'Member';
+$user_id = $_SESSION['user_id'];
+
+// Load nutrition data
+require_once __DIR__ . '/../../models/Nutrition.php';
+require_once __DIR__ . '/../../config/database.php';
+$database = new Database();
+$db = $database->getConnection();
+$nutrition = new Nutrition($db);
+
+$today = date('Y-m-d');
+$supplements = $nutrition->getSupplementsByDate($user_id, $today);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,94 +24,108 @@ $username = $_SESSION['username'] ?? 'Member';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nutrition - Supplements - FitNexus</title>
-    <link rel="stylesheet" href="../../assets/css/member_styles.css">
-    <link rel="stylesheet" href="../../assets/css/nutrition_styles.css">
+    <?php $ms = __DIR__.'/../../assets/css/member_styles.css'; $ns = __DIR__.'/../../assets/css/nutrition_styles.css'; ?>
+    <link rel="stylesheet" href="../../assets/css/member_styles.css?v=<?= @filemtime($ms) ?: time() ?>">
+    <link rel="stylesheet" href="../../assets/css/nutrition_styles.css?v=<?= @filemtime($ns) ?: time() ?>">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
-<body>
+<body class="page-nutrition">
     <!-- Include Dynamic Sidebar -->
     <?php include '../components/dynamic_sidebar.php'; ?>
 
     <!-- Main Content Area -->
     <div class="main-content">
         <div class="content-wrapper">
-            <div class="dashboard-header">
-                <h1>Nutrition - Supplements</h1>
-                <p>Track your supplement intake and monitor your nutritional supplements.</p>
+            <div class="nutrition-header">
+                <h1>Supplement Tracker</h1>
+                <p>Log your supplements and track your daily intake.</p>
             </div>
-
-            <div class="dashboard-grid">
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <h2>Today's Supplements</h2>
-                        <button class="btn-primary">Add Supplement</button>
-                    </div>
-                    <div class="card">
-                        <p>Track your daily supplement intake including vitamins, protein powders, and other nutritional supplements.</p>
-                        <div class="supplement-list">
-                            <div class="supplement-item">
-                                <div class="supplement-info">
-                                    <h4>Whey Protein</h4>
-                                    <p>25g protein • 120 calories</p>
-                                </div>
-                                <div class="supplement-time">
-                                    <span>Post-Workout</span>
-                                </div>
-                            </div>
-                            <div class="supplement-item">
-                                <div class="supplement-info">
-                                    <h4>Multivitamin</h4>
-                                    <p>Daily vitamin complex</p>
-                                </div>
-                                <div class="supplement-time">
-                                    <span>Morning</span>
-                                </div>
-                            </div>
+            <div class="nutrition-grid">
+                <!-- Add Supplement Card -->
+                <div class="nutrition-card">
+                    <h3><i class='bx bx-plus-circle'></i> Add Supplement</h3>
+                    <form method="POST" action="../../controllers/NutritionController.php" class="quick-add-form">
+                        <input type="hidden" name="action" value="add_supplement">
+                        <div class="form-field">
+                            <label>Supplement</label>
+                            <input type="text" name="supplement_name" required placeholder="e.g. Whey Protein">
                         </div>
+                        <div class="form-field">
+                            <label>Dosage</label>
+                            <input type="text" name="dosage" placeholder="e.g. 25g, 1 capsule">
+                        </div>
+                        <div class="form-field">
+                            <label>Time</label>
+                            <input type="time" name="time_taken">
+                        </div>
+                        <div class="form-field">
+                            <label>Date</label>
+                            <input type="date" name="date" value="<?= htmlspecialchars($today) ?>">
+                        </div>
+                        <button type="submit" class="btn-add"><i class='bx bx-plus'></i> Add</button>
+                    </form>
+                </div>
+                <!-- Today's Supplements Card -->
+                <div class="nutrition-card">
+                    <h3><i class='bx bx-pills'></i> Today's Supplements</h3>
+                    <div class="supplement-list">
+                        <?php if (empty($supplements)): ?>
+                            <div class="empty-state">
+                                <i class='bx bx-capsule'></i>
+                                <p>No supplements logged today.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($supplements as $supplement): ?>
+                                <div class="meal-row">
+                                    <div class="food-name"><?= htmlspecialchars($supplement['supplement_name']) ?></div>
+                                    <div class="macro"><?= htmlspecialchars($supplement['dosage'] ?: 'N/A') ?></div>
+                                    <div class="macro"><?= htmlspecialchars($supplement['time_taken'] ?: 'N/A') ?></div>
+                                    <div class="date"><?= htmlspecialchars($supplement['date']) ?></div>
+                                    <form method="POST" action="../../controllers/NutritionController.php" onsubmit="return confirm('Delete this supplement?');" style="display:inline;">
+                                        <input type="hidden" name="action" value="delete_supplement">
+                                        <input type="hidden" name="supplement_id" value="<?= (int)$supplement['supplement_id'] ?>">
+                                        <button type="submit" class="btn-delete"><i class='bx bx-trash'></i> Delete</button>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
-
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <h2>Supplement Schedule</h2>
-                    </div>
-                    <div class="card">
-                        <p>Plan and schedule your supplement intake throughout the day.</p>
-                        <div class="schedule-grid">
-                            <div class="schedule-item">
-                                <h4>Morning</h4>
-                                <ul>
-                                    <li>Multivitamin</li>
-                                    <li>Omega-3</li>
-                                </ul>
-                            </div>
-                            <div class="schedule-item">
-                                <h4>Pre-Workout</h4>
-                                <ul>
-                                    <li>Creatine</li>
-                                    <li>Pre-workout</li>
-                                </ul>
-                            </div>
-                            <div class="schedule-item">
-                                <h4>Post-Workout</h4>
-                                <ul>
-                                    <li>Whey Protein</li>
-                                    <li>BCAA</li>
-                                </ul>
-                            </div>
+                <!-- Schedule Card -->
+                <div class="nutrition-card">
+                    <h3><i class='bx bx-calendar-check'></i> Common Schedule</h3>
+                    <div class="schedule-grid">
+                        <div class="schedule-item">
+                            <h4>Morning</h4>
+                            <ul>
+                                <li>Multivitamin</li>
+                                <li>Omega-3</li>
+                                <li>Vitamin D</li>
+                            </ul>
                         </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-section">
-                    <div class="section-header">
-                        <h2>Supplement History</h2>
-                        <a href="#" class="view-all">View All</a>
-                    </div>
-                    <div class="card">
-                        <p>View your supplement intake history and track your consistency.</p>
-                        <div class="history-chart">
-                            <p>📊 Supplement tracking chart would go here</p>
+                        <div class="schedule-item">
+                            <h4>Pre-Workout</h4>
+                            <ul>
+                                <li>Creatine</li>
+                                <li>Pre-workout</li>
+                                <li>BCAA</li>
+                            </ul>
+                        </div>
+                        <div class="schedule-item">
+                            <h4>Post-Workout</h4>
+                            <ul>
+                                <li>Whey Protein</li>
+                                <li>Glutamine</li>
+                                <li>Electrolytes</li>
+                            </ul>
+                        </div>
+                        <div class="schedule-item">
+                            <h4>Evening</h4>
+                            <ul>
+                                <li>Magnesium</li>
+                                <li>Zinc</li>
+                                <li>Casein Protein</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

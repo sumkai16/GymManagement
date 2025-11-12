@@ -69,23 +69,32 @@ if (!empty($search)) {
 // Transform trainer data to match the display format
 $coaches = [];
 foreach ($trainers as $trainer) {
+    // Create full name from first_name and last_name
+    $fullName = trim(($trainer['first_name'] ?? '') . ' ' . ($trainer['last_name'] ?? ''));
+    if (empty($fullName)) {
+        $fullName = $trainer['username'] ?? 'Unknown Trainer';
+    }
+    
     // Parse specialties from specialty field (if comma-separated) or use as single item
     $specialties = !empty($trainer['specialty']) ? explode(',', $trainer['specialty']) : ['General Training'];
     $specialties = array_map('trim', $specialties);
     
     $coaches[] = [
         'id' => $trainer['trainer_id'],
-        'name' => $trainer['full_name'],
+        'name' => $fullName,
         'specialty' => $trainer['specialty'] ?? 'General Training',
-        'experience' => $trainer['experience'] ?? 'N/A', // Missing field
-        'rating' => $trainer['rating'] ?? '4.5', // Missing field
-        'clients' => $trainer['total_clients'] ?? '0', // Missing field
-        'sessions' => $trainer['total_sessions'] ?? '0', // Missing field
-        'description' => $trainer['description'] ?? 'Certified fitness professional dedicated to helping you achieve your fitness goals.', // Missing field
+        'experience' => $trainer['experience_years'] ?? '1+ years',
+        'rating' => '4.5', // Default rating
+        'clients' => $trainer['total_clients'] ?? '0',
+        'sessions' => $trainer['total_sessions'] ?? '0',
+        'description' => 'Certified fitness professional with ' . ($trainer['experience_years'] ?? 1) . ' years of experience in ' . ($trainer['specialty'] ?? 'fitness training'),
         'specialties' => $specialties,
         'email' => $trainer['email'] ?? '',
         'phone' => $trainer['phone'] ?? '',
-        'image' => $trainer['image'] ?? 'default_trainer.png'
+        'image' => $trainer['image'] ?? 'default_trainer.png',
+        'certification' => $trainer['certification'] ?? 'Certified Trainer',
+        'hourly_rate' => $trainer['hourly_rate'] ?? 500,
+        'availability' => $trainer['availability'] ?? 'Available'
     ];
 }
 ?>
