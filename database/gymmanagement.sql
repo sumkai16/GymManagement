@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2025 at 04:30 PM
+-- Generation Time: Nov 13, 2025 at 07:56 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -177,7 +177,9 @@ CREATE TABLE `members` (
 
 INSERT INTO `members` (`member_id`, `user_id`, `full_name`, `email`, `phone`, `address`, `membership_type`, `start_date`, `end_date`, `status`) VALUES
 (4, 19, 'Arl Sison', 'arlsison@gmail.com', '9877654325', 'san vicente 4, tunghaan, minglanilla, cebu', 'monthly', '2025-12-25', '2026-12-06', 'active'),
-(5, 25, 'arljoshua', 'member25@gmail.com', '09123456789', 'Address to be updated', 'monthly', '2025-11-12', '2025-12-12', 'active');
+(5, 25, 'arljoshua', 'member25@gmail.com', '09123456789', 'Address to be updated', 'monthly', '2025-11-12', '2025-12-12', 'active'),
+(6, 27, 'James Sison', 'james@gmail.com', '9876544325', 'Minglanilla', 'annual', '2025-11-14', '2025-12-14', 'active'),
+(7, 28, 'Nico Deiparine', 'nicO@GMAIL.COM', '9832456789', 'Minglanilla', 'monthly', '2025-11-14', '2025-12-14', 'active');
 
 -- --------------------------------------------------------
 
@@ -205,7 +207,8 @@ INSERT INTO `nutrition_logs` (`nutrition_id`, `user_id`, `food_item`, `calories`
 (2, 23, 'rice, cooked', 130, 2.69, 28.17, 0.28, '2025-11-12'),
 (3, 19, 'rice', 130, 2.69, 28.17, 0.28, '2025-11-12'),
 (4, 19, 'salmon', 208, 20.42, 0.00, 13.42, '2025-11-12'),
-(5, 19, 'chicken breast, cooked, skinless', 165, 31.00, 0.00, 3.60, '2025-11-12');
+(5, 19, 'chicken breast, cooked, skinless', 165, 31.00, 0.00, 3.60, '2025-11-12'),
+(6, 19, 'rice', 143, 2.96, 30.99, 0.31, '2025-11-13');
 
 -- --------------------------------------------------------
 
@@ -247,7 +250,9 @@ INSERT INTO `routine_exercises` (`re_id`, `routine_id`, `exercise_id`, `sets`, `
 (16, 3, 356, 3, 10, NULL, '', 0, '2025-11-12 13:35:37', NULL),
 (17, 3, 355, 3, 10, NULL, '', 0, '2025-11-12 13:35:40', NULL),
 (18, 3, 357, 3, 10, NULL, '', 0, '2025-11-12 13:35:44', NULL),
-(19, 3, 362, 3, 10, NULL, '', 0, '2025-11-12 13:35:53', NULL);
+(19, 3, 362, 3, 10, NULL, '', 0, '2025-11-12 13:35:53', NULL),
+(20, 7, 341, 3, 10, NULL, '', 0, '2025-11-13 06:19:00', NULL),
+(21, 7, 340, 3, 10, NULL, '', 0, '2025-11-13 06:19:10', NULL);
 
 -- --------------------------------------------------------
 
@@ -263,6 +268,13 @@ CREATE TABLE `supplement_logs` (
   `time_taken` time DEFAULT NULL,
   `date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `supplement_logs`
+--
+
+INSERT INTO `supplement_logs` (`supplement_id`, `user_id`, `supplement_name`, `dosage`, `time_taken`, `date`) VALUES
+(1, 19, 'Creatine', '5g', '12:00:00', '2025-11-13');
 
 -- --------------------------------------------------------
 
@@ -320,7 +332,9 @@ CREATE TABLE `trainer_bookings` (
 INSERT INTO `trainer_bookings` (`booking_id`, `member_id`, `trainer_id`, `booking_date`, `booking_time`, `status`, `created_at`, `updated_at`) VALUES
 (1, 4, 8, '2025-11-04', '22:00:00', 'cancelled', '2025-11-02 04:06:38', '2025-11-02 04:12:56'),
 (2, 5, 9, '2025-11-17', '17:00:00', 'pending', '2025-11-12 05:49:02', '2025-11-12 05:49:02'),
-(3, 4, 8, '2025-11-15', '19:05:00', 'confirmed', '2025-11-12 11:01:12', '2025-11-12 11:02:08');
+(3, 4, 8, '2025-11-15', '19:05:00', 'confirmed', '2025-11-12 11:01:12', '2025-11-12 11:02:08'),
+(4, 4, 9, '2025-11-14', '19:23:00', 'pending', '2025-11-13 06:23:37', '2025-11-13 06:23:37'),
+(5, 5, 8, '2025-11-14', '14:40:00', 'confirmed', '2025-11-13 06:36:09', '2025-11-13 06:40:21');
 
 -- --------------------------------------------------------
 
@@ -355,7 +369,10 @@ INSERT INTO `users` (`user_id`, `username`, `password`, `email`, `first_name`, `
 (23, 'Klyde', '$2y$10$M8RjJ/r9lBMEvZAuzvVuU.P.hauTrA8gSUTHG8/IdBGc6xbTtD6FC', '', '', '', '', 'trainer', '2025-10-30 12:19:00', 'active'),
 (24, 'trainer', '$2y$10$29KOP8GpbpsA.rg7UHczUe/DTS8xjpQv/SlJiByYpS8mnqLC9D.qa', '', '', '', '', 'trainer', '2025-11-12 02:49:23', 'active'),
 (25, 'arljoshua', '$2y$10$v2VEJizRRgjYofO9gegsy.i9UHp6pJPBKVYtTtdqqSjis/ZutXOLu', '', '', '', '', 'member', '2025-11-12 03:32:43', 'active'),
-(26, 'admin123', '$2y$10$9QydKxY/UW18RCOXYbcqVeZeib1d3M.z2atuY5WsCNWw0R9gdZJWK', '', '', '', '', 'admin', '2025-11-12 05:07:48', 'active');
+(26, 'admin123', '$2y$10$9QydKxY/UW18RCOXYbcqVeZeib1d3M.z2atuY5WsCNWw0R9gdZJWK', '', '', '', '', 'admin', '2025-11-12 05:07:48', 'active'),
+(27, 'jimjim', '$2y$10$bWPHPxlK5uz.K.us/NnuZ.d2YkK6Yzvr5uuD0D9Z5Z1rfw.sBDBxK', 'james@gmail.com', 'James', 'Sison', 'Minglanilla', 'member', '2025-11-13 06:46:14', 'active'),
+(28, 'Niconi', '$2y$10$mIOJFIufgS6fLNpl4KFX2.IOUhD4MSO6NAwT0K2iuzAHxgxL3qRwu', 'nicO@GMAIL.COM', 'Nico', 'Deiparine', 'Minglanilla', 'member', '2025-11-13 06:47:01', 'active'),
+(29, 'Rasheed', '$2y$10$Tkw7.3qr78vHF1HFqGnmwuU.AlvLdaY0nKNgn.cPqRXnsh9J8ENty', 'Rasheed@gym.local', 'Rasheed', '', '', 'guest', '2025-11-13 06:49:20', 'active');
 
 -- --------------------------------------------------------
 
@@ -383,7 +400,10 @@ INSERT INTO `workouts` (`workout_id`, `routine_id`, `workout_name`, `created_at`
 (7, 3, 'Workout Nov 12, 2025', '2025-11-12 13:35:56', '2025-11-12 14:18:57'),
 (11, 4, 'Workout Nov 12, 2025', '2025-11-12 13:56:55', '2025-11-12 13:57:02'),
 (12, 4, 'Workout Nov 12, 2025', '2025-11-12 13:59:08', '2025-11-12 13:59:09'),
-(13, 4, 'Workout Nov 12, 2025', '2025-11-12 14:17:29', '2025-11-12 14:18:38');
+(13, 4, 'Workout Nov 12, 2025', '2025-11-12 14:17:29', '2025-11-12 14:18:38'),
+(16, 7, 'Workout Nov 13, 2025', '2025-11-13 06:19:15', '2025-11-13 06:20:26'),
+(17, 3, 'Workout Nov 13, 2025', '2025-11-13 06:24:59', '2025-11-13 06:25:34'),
+(18, 3, 'Workout Nov 13, 2025', '2025-11-13 06:26:02', '2025-11-13 06:26:33');
 
 -- --------------------------------------------------------
 
@@ -438,7 +458,19 @@ INSERT INTO `workout_exercises` (`we_id`, `workout_id`, `exercise_id`, `sets`, `
 (71, 13, 362, 3, 10, NULL, 0),
 (72, 13, 354, 3, 10, NULL, 0),
 (73, 13, 356, 3, 10, NULL, 0),
-(74, 13, 355, 3, 10, NULL, 0);
+(74, 13, 355, 3, 10, NULL, 0),
+(78, 16, 341, 3, 10, NULL, 1),
+(79, 16, 340, 3, 10, NULL, 1),
+(81, 17, 354, 3, 10, NULL, 0),
+(82, 17, 356, 3, 10, NULL, 0),
+(83, 17, 355, 3, 10, NULL, 0),
+(84, 17, 357, 3, 10, NULL, 0),
+(85, 17, 362, 3, 10, NULL, 0),
+(88, 18, 354, 3, 10, NULL, 0),
+(89, 18, 356, 3, 10, NULL, 0),
+(90, 18, 355, 3, 10, NULL, 0),
+(91, 18, 357, 3, 10, NULL, 0),
+(92, 18, 362, 3, 10, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -462,7 +494,13 @@ CREATE TABLE `workout_exercise_sets` (
 
 INSERT INTO `workout_exercise_sets` (`wes_id`, `we_id`, `set_number`, `reps`, `weight`, `is_done`, `created_at`) VALUES
 (1, 18, 1, NULL, NULL, 0, '2025-11-12 04:01:42'),
-(2, 29, 1, NULL, NULL, 0, '2025-11-12 13:36:04');
+(2, 29, 1, NULL, NULL, 0, '2025-11-12 13:36:04'),
+(3, 78, 1, 12, 50.00, 0, '2025-11-13 06:19:27'),
+(4, 78, 2, 12, 55.00, 0, '2025-11-13 06:19:47'),
+(5, 79, 1, 12, 40.00, 0, '2025-11-13 06:20:08'),
+(6, 81, 1, 0, 0.00, 0, '2025-11-13 06:25:18'),
+(7, 81, 2, NULL, NULL, 0, '2025-11-13 06:25:26'),
+(8, 81, 3, NULL, NULL, 0, '2025-11-13 06:25:29');
 
 -- --------------------------------------------------------
 
@@ -503,7 +541,15 @@ INSERT INTO `workout_logs` (`log_id`, `member_id`, `workout_id`, `exercise_id`, 
 (14, 4, 3, 343, 3, 10, NULL, 12861, '2025-11-12'),
 (15, 4, 3, 344, 3, 10, NULL, 12861, '2025-11-12'),
 (16, 4, 5, 354, 3, 10, NULL, 1, '2025-11-12'),
-(17, 4, 7, 354, 1, NULL, NULL, 44, '2025-11-12');
+(17, 4, 7, 354, 1, NULL, NULL, 44, '2025-11-12'),
+(18, 4, 17, 354, 1, 0, 0.00, 1, '2025-11-13'),
+(19, 4, 17, 354, 1, NULL, NULL, 1, '2025-11-13'),
+(20, 4, 17, 354, 1, NULL, NULL, 1, '2025-11-13'),
+(21, 4, 18, 354, 3, 10, NULL, 1, '2025-11-13'),
+(22, 4, 18, 356, 3, 10, NULL, 1, '2025-11-13'),
+(23, 4, 18, 355, 3, 10, NULL, 1, '2025-11-13'),
+(24, 4, 18, 357, 3, 10, NULL, 1, '2025-11-13'),
+(25, 4, 18, 362, 3, 10, NULL, 1, '2025-11-13');
 
 -- --------------------------------------------------------
 
@@ -530,7 +576,8 @@ INSERT INTO `workout_routines` (`routine_id`, `user_id`, `routine_name`, `descri
 (3, 19, 'Pull Day', '', 0, '2025-11-12 11:27:45'),
 (4, 23, 'Pull Day', '', 0, '2025-11-12 12:22:37'),
 (5, 18, 'Pull Day', '', 0, '2025-11-12 13:23:51'),
-(6, 19, 'Leg Die', '', 0, '2025-11-12 14:19:32');
+(6, 19, 'Leg Die', '', 0, '2025-11-12 14:19:32'),
+(7, 23, 'Push Day', '', 0, '2025-11-13 06:18:37');
 
 --
 -- Indexes for dumped tables
@@ -673,25 +720,25 @@ ALTER TABLE `food_database`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `member_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `member_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `nutrition_logs`
 --
 ALTER TABLE `nutrition_logs`
-  MODIFY `nutrition_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `nutrition_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `routine_exercises`
 --
 ALTER TABLE `routine_exercises`
-  MODIFY `re_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `re_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `supplement_logs`
 --
 ALTER TABLE `supplement_logs`
-  MODIFY `supplement_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `supplement_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `trainers`
@@ -703,43 +750,43 @@ ALTER TABLE `trainers`
 -- AUTO_INCREMENT for table `trainer_bookings`
 --
 ALTER TABLE `trainer_bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `workouts`
 --
 ALTER TABLE `workouts`
-  MODIFY `workout_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `workout_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `workout_exercises`
 --
 ALTER TABLE `workout_exercises`
-  MODIFY `we_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `we_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- AUTO_INCREMENT for table `workout_exercise_sets`
 --
 ALTER TABLE `workout_exercise_sets`
-  MODIFY `wes_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `wes_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `workout_logs`
 --
 ALTER TABLE `workout_logs`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `workout_routines`
 --
 ALTER TABLE `workout_routines`
-  MODIFY `routine_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `routine_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables

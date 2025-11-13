@@ -80,8 +80,14 @@ class AdminController {
             return ['success' => false, 'message' => 'Username already exists'];
         }
 
+        // Provide default values for required fields not in the form
+        $email = $username . '@gym.local'; // Default email based on username
+        $first_name = $username; // Use username as first name
+        $last_name = ''; // Empty last name
+        $address = ''; // Empty address
+
         // Add user
-        $result = $this->userModel->register($username, $password, $role, $status);
+        $result = $this->userModel->register($username, $password, $email, $first_name, $last_name, $address, $role, $status);
         if ($result) {
             return ['success' => true, 'message' => 'User added successfully'];
         }

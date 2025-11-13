@@ -168,7 +168,7 @@ $completedToday = $member->hasWorkoutCompletedToday($_SESSION['user_id']);
                             <i class='bx bx-plus'></i>
                             <span>Start Workout</span>
                         </a>
-                        <a href="nutrition-food.php" class="action-btn">
+                        <a href="nutrition_food.php" class="action-btn">
                             <i class='bx bx-bowl-rice'></i>
                             <span>Log Meal</span>
                         </a>

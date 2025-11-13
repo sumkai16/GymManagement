@@ -9,6 +9,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'guest') {
 
 // Get user information
 $username = $_SESSION['username'] ?? 'Guest';
+
+// Fetch trainers from database
+require_once __DIR__ . '/../models/Trainer.php';
+$trainerModel = new Trainer();
+$trainers = $trainerModel->getAllTrainers();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -287,65 +292,80 @@ $username = $_SESSION['username'] ?? 'Guest';
                 </div>
 
                 <div class="trainers-grid">
-                    <div class="trainer-card">
-                        <div class="trainer-image">
-                            <img src="../assets/images/trainers/axcee.png" alt="Trainer 1">
+                    <?php if (empty($trainers)): ?>
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <i class='bx bx-user-x' style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                            <p>No trainers available at the moment.</p>
                         </div>
-                        <div class="trainer-info">
-                            <h3>Axcee Cabusas</h3>
-                            <p class="trainer-title">Semi Calisthenic and Free Weight Trainer</p>
-                            <div class="trainer-expertise">
-                                <span class="expertise-tag">Semi Calisthenic</span>
-                                <span class="expertise-tag">Free Weight</span>
+                    <?php else: ?>
+                        <?php foreach ($trainers as $trainer): ?>
+                            <?php
+                            // Parse specialty to create expertise tags
+                            $specialty = $trainer['specialty'] ?? '';
+                            $expertiseTags = [];
+                            if (!empty($specialty)) {
+                                // Split by common delimiters: "and", ",", "&"
+                                $parts = preg_split('/\s*(?:and|,|&)\s*/i', $specialty);
+                                foreach ($parts as $part) {
+                                    $part = trim($part);
+                                    if (!empty($part)) {
+                                        $expertiseTags[] = $part;
+                                    }
+                                }
+                            }
+                            // If no tags created, use the specialty as a single tag
+                            if (empty($expertiseTags) && !empty($specialty)) {
+                                $expertiseTags[] = $specialty;
+                            }
+                            
+                            // Handle image path
+                            $img = isset($trainer['image']) ? trim($trainer['image']) : '';
+                            $imageSrc = '../assets/images/trainers/default_trainer.png';
+                            if (!empty($img) && $img !== 'default_trainer.png') {
+                                $isAbsolute = stripos($img, 'http://') === 0 || stripos($img, 'https://') === 0 || substr($img, 0, 1) === '/';
+                                $alreadyPrefixed = strpos($img, 'assets/images/trainers/') === 0;
+                                if ($isAbsolute || $alreadyPrefixed) {
+                                    $imageSrc = $img;
+                                } else {
+                                    $imageSrc = '../assets/images/trainers/' . $img;
+                                }
+                            }
+                            
+                            // Build description
+                            $experience = $trainer['experience'] ?? '';
+                            $description = '';
+                            if (!empty($experience)) {
+                                $description = $experience . ' experience';
+                                if (!empty($specialty)) {
+                                    $description .= ' in ' . strtolower($specialty);
+                                }
+                            } else if (!empty($specialty)) {
+                                $description = 'Expert in ' . strtolower($specialty);
+                            } else {
+                                $description = 'Certified fitness professional';
+                            }
+                            ?>
+                            <div class="trainer-card">
+                                <div class="trainer-image">
+                                    <img src="<?php echo htmlspecialchars($imageSrc); ?>" 
+                                         alt="<?php echo htmlspecialchars($trainer['full_name'] ?? 'Trainer'); ?>"
+                                         onerror="this.src='../assets/images/trainers/default_trainer.png'">
+                                </div>
+                                <div class="trainer-info">
+                                    <h3><?php echo htmlspecialchars($trainer['full_name'] ?? 'Trainer'); ?></h3>
+                                    <p class="trainer-title"><?php echo htmlspecialchars($specialty ?: 'Fitness Trainer'); ?></p>
+                                    <?php if (!empty($expertiseTags)): ?>
+                                        <div class="trainer-expertise">
+                                            <?php foreach ($expertiseTags as $tag): ?>
+                                                <span class="expertise-tag"><?php echo htmlspecialchars($tag); ?></span>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <p class="trainer-description"><?php echo htmlspecialchars($description); ?></p>
+                                </div>
                             </div>
-                            <p class="trainer-description">2 years experience in calisthenic and free weight training</p>
-                        </div>
-                    </div>
-
-                    <div class="trainer-card">
-                        <div class="trainer-image">
-                            <img src="https://via.placeholder.com/150" alt="Trainer 2">
-                        </div>
-                        <div class="trainer-info">
-                            <h3>Joseph Anthony Arambala</h3>
-                            <p class="trainer-title">Strength and Conditioning Coach</p>
-                            <div class="trainer-expertise">
-                                <span class="expertise-tag">Strength Training</span>
-                                <span class="expertise-tag">Body Building</span>
-                            </div>
-                            <p class="trainer-description">5+ years experience in strength training and bodybuilding</p>
-                        </div>
-                    </div>
-
-                    <div class="trainer-card">
-                        <div class="trainer-image">
-                            <img src="../assets/images/trainers/klyde.jpg" alt="Trainer 3">
-                        </div>
-                        <div class="trainer-info">
-                            <h3>Jan Klyde Bulagao</h3>
-                            <p class="trainer-title">Strength and Nutrition Coach</p>
-                            <div class="trainer-expertise">
-                                <span class="expertise-tag">Strength Training</span>
-                                <span class="expertise-tag">Nutrition</span>
-                            </div>
-                            <p class="trainer-description">2 years experience in strength training and nutrition</p>
-                        </div>
-                    </div>
-
-                    <div class="trainer-card">
-                        <div class="trainer-image">
-                            <img src="https://via.placeholder.com/150" alt="Trainer 4">
-                        </div>
-                        <div class="trainer-info">
-                            <h3>Jerkean Gabrina</h3>
-                            <p class="trainer-title">Body Composition and Nutrition Coach</p>
-                            <div class="trainer-expertise">
-                                <span class="expertise-tag">Body Composition</span>
-                                <span class="expertise-tag">Nutrition</span>
-                            </div>
-                            <p class="trainer-description">2 years experience in body composition and nutrition</p>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
 

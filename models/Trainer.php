@@ -340,6 +340,7 @@ class Trainer {
                     SELECT DISTINCT tb.member_id 
                     FROM trainer_bookings tb 
                     WHERE tb.trainer_id = :trainer_id
+                    AND tb.status = 'confirmed'
                 )
                 ORDER BY m.full_name
             ");
