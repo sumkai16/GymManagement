@@ -80,23 +80,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'register') {
+        // Additional fields for registration
+        $firstName = trim(filter_input(INPUT_POST, 'first_name', FILTER_SANITIZE_STRING) ?? '');
+        $lastName = trim(filter_input(INPUT_POST, 'last_name', FILTER_SANITIZE_STRING) ?? '');
+        $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL) ?? '');
+        $address = trim(filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING) ?? '');
+
+        // Validate required registration fields
+        if (empty($firstName) || empty($lastName) || empty($email)) {
+            $_SESSION['error'] = "First name, last name, and a valid email are required.";
+            header("Location: ../views/auth/register.php");
+            exit;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['error'] = "Please provide a valid email address.";
+            header("Location: ../views/auth/register.php");
+            exit;
+        }
+
         // Check if username already exists
-        try {
-            $existingUser = $userModel->login($username, 'dummy'); // Check if user exists
-            if ($existingUser) {
-                $_SESSION['error'] = "Username already exists. Please choose a different username.";
-                header("Location: ../views/auth/register.php");
-                exit;
-            }
-        } catch (Exception $e) {
-            // If login fails, user doesn't exist (which is what we want)
+        if ($userModel->userExists($username)) {
+            $_SESSION['error'] = "Username already exists. Please choose a different username.";
+            header("Location: ../views/auth/register.php");
+            exit;
         }
         
         $role = "guest";    // default role
         $status = "inactive"; // default status
 
         try {
-            if ($userModel->register($username, $password, $role, $status)) {
+            if ($userModel->register($username, $password, $email, $firstName, $lastName, $address, $role, $status)) {
                 $_SESSION['success'] = "Registration successful. User still needs to be activated by admin.";
                 header("Location: ../views/auth/login.php");
                 exit;
